@@ -1,12 +1,18 @@
 import { Table, Model, Column, DataType, ForeignKey, HasMany, BelongsTo, HasOne } from 'sequelize-typescript';
 import { Vehicle } from './vehicle';
 import { Bid } from './bid';
-import { AuctionStatus, Category } from './enum';
+import { UUIDTypes } from 'uuid';
+import { col } from 'sequelize';
 
 @Table({ timestamps: false })
 export class Auction extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
-  declare id: number;
+  @Column({ 
+    primaryKey: true, 
+    allowNull: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4, 
+  })
+  declare auction_id: string;
 
   @Column(DataType.STRING)
   declare title: string;
@@ -26,22 +32,18 @@ export class Auction extends Model {
   @Column(DataType.DATE)
   declare endDate: Date;
 
-  @Column({
-    type: DataType.ENUM(...Object.values(AuctionStatus)),
-  })
-  declare status: AuctionStatus;
+  @Column(DataType.STRING)
+  declare status: string;
 
-  @Column({
-    type: DataType.ENUM(...Object.values(Category)),
-  })
-  declare category: Category;
+  @Column(DataType.STRING)
+  declare category: string;
 
   @Column(DataType.STRING)
   declare image: string;
 
   @ForeignKey(() => Vehicle)
-  @Column(DataType.INTEGER)
-  declare vehicleId: number;
+  @Column(DataType.UUID)
+  declare vehicle_id: string;
 
   @BelongsTo(() => Vehicle)
   declare vehicle: Vehicle;

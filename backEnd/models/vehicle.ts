@@ -1,10 +1,16 @@
 import { Table, Model, Column, DataType, HasOne } from 'sequelize-typescript';
 import { Auction } from './auction';
+import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class Vehicle extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
-  declare id: number;
+  @Column({ 
+    primaryKey: true, 
+    allowNull: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  })
+  declare vehicle_id: string;
 
   @Column(DataType.STRING)
   declare type: string;

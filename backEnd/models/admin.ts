@@ -1,13 +1,15 @@
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
+import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class Admin extends Model {
   @Column({
     primaryKey: true,
-    autoIncrement: true,
-    type: DataType.INTEGER,
+    allowNull: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
   })
-  declare id: number;
+  declare admin_id: string;
 
   @Column(DataType.STRING)
   declare username: string;

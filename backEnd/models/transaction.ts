@@ -1,19 +1,26 @@
 import { Table, Model, Column, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { User } from './user';
 import { Auction } from './auction';
+import { UUIDTypes } from 'uuid';
+import { StringifyOptions } from 'querystring';
 
 @Table({ timestamps: false })
 export class Transaction extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
-  declare id: number;
+  @Column({ 
+    primaryKey: true, 
+    allowNull: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
+  })
+  declare transaction_id: string;
 
   @ForeignKey(() => Auction)
-  @Column(DataType.INTEGER)
-  declare auctionId: number;
+  @Column(DataType.UUID)
+  declare auction_id: string;
 
   @ForeignKey(() => User)
-  @Column(DataType.INTEGER)
-  declare userId: number;
+  @Column(DataType.UUID)
+  declare user_id: string;
 
   @Column(DataType.FLOAT)
   declare amount: number;
