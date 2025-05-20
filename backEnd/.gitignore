@@ -1,0 +1,16 @@
+# Ignore folder node_modules
+node_modules/
+config/
+
+# Ignore Python virtual environment
+venv/
+
+# Ignore environment variables
+.env
+
+# Ignore log files
+*.log
+
+# Ignore Windows dan editor temporary files
+Thumbs.db
+*.swp
