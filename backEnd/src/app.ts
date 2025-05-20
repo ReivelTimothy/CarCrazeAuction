@@ -4,7 +4,7 @@ import vehicleRoutes from './routes/vehicleRoutes';
 import adminRoutes from './routes/adminRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import bidRoutes from './routes/bidRoutes';
-
+import auctionRoutes from './routes/auctionRoutes';
 import { Sequelize } from 'sequelize-typescript';
 import { User } from '../models/user';
 import { Admin } from '../models/admin';
@@ -36,11 +36,12 @@ app.use('/vehicle', vehicleRoutes);
 app.use('/admin', adminRoutes);
 app.use('/transaction', transactionRoutes);
 app.use('/bid', bidRoutes);
+app.use('/auction', auctionRoutes);
 // ------------------------------------
 
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
+    console.error(err.stack, "muhahaha");
     res.status(500).json({ error: 'Something went wrong!' });
 });
 
