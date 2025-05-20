@@ -5,9 +5,9 @@ const transactionRoutes = express.Router();
 // 1. Get All Transactions
 transactionRoutes.get('/getAllTransactions', /*authenticateJWT,*/ getAllTransactions);
 // 2. Get Transaction by ID
-transactionRoutes.get('/:id', /*authenticateJWT,*/ getTransactionById);
+transactionRoutes.get('/:id/getTransaction', /*authenticateJWT,*/ getTransactionById);
 // 3. Get Transaction by User ID
-transactionRoutes.get('/getTransactionByUserId/:user_id', /*authenticateJWT,*/ getTransactionByUserId);
+transactionRoutes.get('/:user_id/getTransactionByUserId', /*authenticateJWT,*/ getTransactionByUserId);
 // 4. Create Transaction
 transactionRoutes.post('/createTransaction', /*authenticateJWT,*/  createTransaction);
 // 5. Update Transaction Status
