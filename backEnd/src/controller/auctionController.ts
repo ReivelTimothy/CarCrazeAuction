@@ -1,0 +1,69 @@
+import { Auction } from "../../models/auction";
+
+// 1. Create Auction
+export const createAuction = async (req: any, res: any) => {
+    try {
+        const { vehicle_id, title, description, startingPrice, status, category } = req.body;
+        const auction = await Auction.create({
+            vehicle_id,
+            title,
+            description,
+            startingPrice,
+            currentPrice: startingPrice, 
+            startDate : new Date(),
+            endDate : new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // default to 7 days from now
+            status,
+            category,
+            image : null // default to null
+        });
+        res.status(201).json(auction);
+    } catch (error) {
+        console.error("Error creating auction:", error);
+        res.status(500).json({ message: "Error creating auction", error });
+    }
+};
+
+// 2. Get all Auctions
+export const getAllAuctions = async (req: any, res: any) => {
+    try {
+        const auctions = await Auction.findAll();
+        res.status(200).json(auctions);
+    } catch (error) {
+        console.error("Error retrieving auctions:", error);
+        res.status(500).json({ message: "Error retrieving auctions", error });
+    }
+};
+
+// 3. Get Auction by ID
+export const getAuctionById = async (req: any, res: any) => {
+    try {
+        const auctionId = req.params.id;
+        const auction = await Auction.findOne({ where: { auction_id: auctionId } });
+        if (!auction) {
+            return res.status(404).json({ message: "Auction not found" });
+        }
+        res.status(200).json(auction);
+    } catch (error) {
+        console.error("Error retrieving auction:", error);
+        res.status(500).json({ message: "Error retrieving auction", error });
+    }
+};
+// 4. Update Auction status
+export const updateAuctionStatus = async (req: any, res: any) => {
+    try {
+        const auctionId = req.params.id;
+        const { status } = req.body;
+        const auction = await Auction.findOne({ where: { auction_id: auctionId } });
+        if (!auction) {
+            return res.status(404).json({ message: "Auction not found" });
+        }
+        auction.status = status;
+        await auction.save();
+        res.status(200).json(auction);
+    } catch (error) {
+        console.error("Error updating auction status:", error);
+        res.status(500).json({ message: "Error updating auction status", error });
+    }
+};
+
+
