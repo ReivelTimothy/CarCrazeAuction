@@ -1,15 +1,17 @@
 import {Table, Model, Column, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import { Bid } from './bid';
 import { Transaction } from './transaction';
+import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class User extends Model {
   @Column({
-    primaryKey: true,
-    autoIncrement: true,
-    type: DataType.INTEGER,
+    primaryKey: true, 
+    allowNull: false,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
   })
-  declare id: number;
+  declare user_id: string;
 
   @Column(DataType.STRING)
   declare username: string;

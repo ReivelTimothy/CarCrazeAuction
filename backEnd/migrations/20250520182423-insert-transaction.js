@@ -5,19 +5,20 @@ export default {
   async up (queryInterface, Sequelize) {
      await queryInterface.createTable('Transactions', {
       transaction_id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
+        type: Sequelize.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
+        allowNull: false
       },
-      auctionId: {
-        type: Sequelize.INTEGER,
+      auction_id: {
+        type: Sequelize.UUID,
         references: {
           model: 'Auctions',
           key: 'auction_id',
         },
         allowNull: false,
       },
-      userId: {
+      user_id: {
         type: Sequelize.UUID,
         references: {
           model: 'Users',
