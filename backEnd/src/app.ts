@@ -12,12 +12,14 @@ import { Vehicle } from '../models/vehicle';
 import { Auction } from '../models/auction';
 import { Bid } from '../models/bid';
 import { Transaction } from '../models/transaction';
+import cors from 'cors';
+
 
 
 const config = require('../config/config.json');
 const app = express();
 app.use(express.json());
-
+app.use(cors())
 const sequelize = new Sequelize({
     ...config.development,
     models: [User, Admin, Vehicle, Auction, Bid, Transaction],

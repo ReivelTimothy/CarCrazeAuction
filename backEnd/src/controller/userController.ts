@@ -86,7 +86,7 @@ export const loginUser = async (req: any, res: any) => {
 // 4. Get User Profile
 export const getUserProfile = async (req: any, res: any) => {
     try {
-        const userId = req.userId; // Assuming you have middleware to extract userId from token
+        const userId = req.body.userId; // Assuming you have middleware to extract userId from token
 
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });
