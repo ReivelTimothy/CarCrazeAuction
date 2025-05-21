@@ -14,7 +14,7 @@ const Login: React.FC = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) {
-            setError("Email and password are required.");
+            setError("Email and password are required..");
         } else {
             try {
                 const response = await fetchFromAPI("/user/login", "POST", { email, password });
