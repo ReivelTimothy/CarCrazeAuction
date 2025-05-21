@@ -3,16 +3,22 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Color palette */
+  --color-darkest: #222831;
+  --color-dark: #393E46;
+  --color-accent: #948979;
+  --color-light: #DFD0B8;
+
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--color-light);
+  background-color: var(--color-darkest);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+/* 
 a {
   font-weight: 500;
   color: #646cff;
@@ -65,4 +71,4 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
-}
+} */

@@ -10,12 +10,12 @@ userRoutes.post('/login', loginUser);
 // 3. Logout User
 userRoutes.post('/logout', authenticateJWT, logoutUser);
 // 4. Get All Users
-userRoutes.get('/', authenticateJWT, authorizeAdmin, getAllUsers);
+userRoutes.get('/', authenticateJWT, getAllUsers);
 // 5. Get User Profile
-userRoutes.get('/UpdateUser', authenticateJWT, getUserProfile);
+userRoutes.get('/getUserProfile', authenticateJWT, getUserProfile);
 // 6. Update User Profile
-userRoutes.put('/deleteUser', authenticateJWT, updateUserProfile);
+userRoutes.put('/updateUser', authenticateJWT, updateUserProfile);
 // 7. Delete User Profile
-userRoutes.delete('/Delete', authenticateJWT, deleteUserProfile);
+userRoutes.delete('/deleteUser', authenticateJWT, deleteUserProfile);
 
 export default userRoutes;

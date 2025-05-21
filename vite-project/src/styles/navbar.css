@@ -1,0 +1,45 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #222;
+  padding: 0.75rem 2rem;
+  color: #fff;
+  position: fixed;      /* Tambahkan ini */
+  top: 0;               /* Tambahkan ini */
+  left: 0;              /* Tambahkan ini */
+  width: 100%;          /* Tambahkan ini */
+  z-index: 1000;        /* Supaya di atas konten lain */
+  box-sizing: border-box;
+}
+
+/* Tambahkan margin-top pada konten utama agar tidak tertutup navbar */
+.main-content {
+  margin-top: 60px; /* Atur sesuai tinggi navbar */
+}
+
+.navbar-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.navbar-links a:hover,
+.navbar-links .active-link {
+  background: #444;
+  color: #ffd700;
+}
