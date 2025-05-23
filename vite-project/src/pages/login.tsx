@@ -27,9 +27,7 @@ const Login: React.FC = () => {
             // Clear the state to avoid showing the message again on refresh
             window.history.replaceState({}, document.title);
         }
-    }, [location]);
-
-    const handleLogin = async (e: React.FormEvent) => {
+    }, [location]);    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -41,21 +39,24 @@ const Login: React.FC = () => {
         }
 
         try {
-            // Simulate API call - replace with actual API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Import authAPI dynamically to avoid circular dependencies
+            const { authAPI } = await import('../services/apiService');
             
-            // In a real app, you would make an API call to login:
-            // const response = await fetchFromAPI("/user/login", "POST", { email, password });
-            // const token = response.token;
+            // Use authAPI for login
+            const response = await authAPI.login({ email, password });
             
-            // Simulate successful login
-            localStorage.setItem("token", "sample-token");
+            // Extract token from response
+            const { token } = response.data;
+              // Store token in localStorage
+            localStorage.setItem("token", token);
+            
             if (rememberMe) {
                 localStorage.setItem("rememberedEmail", email);
             } else {
                 localStorage.removeItem("rememberedEmail");
             }
             
+            // Redirect to home page
             navigate("/home");
         } catch (error) {
             console.log("Login error:", error);

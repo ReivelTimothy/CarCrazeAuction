@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, Clock, Tag, Car, Settings, Bell, LogOut, 
   Star, Heart, Gavel, ArrowRight, CalendarClock, 
   BadgeCheck, AlertTriangle, CheckCheck, X
 } from 'lucide-react';
 import Navbar from '../components/navbar';
-import { fetchFromAPI } from "../../../backend/src/api/api.ts";
+import { authAPI } from "../services/apiService";
+import { useApiRequest } from '../hooks/useApiRequest';
 import '../styles/dashboard.css';
 
 interface Bid {

@@ -1,5 +1,5 @@
+// Simplified API service with proper types
 import axios from 'axios';
-import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -13,20 +13,20 @@ const api = axios.create({
 
 // Request interceptor to add auth token to requests
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config) => {
     const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error: any) => Promise.reject(error)
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor to handle common errors
 api.interceptors.response.use(
-  (response: any) => response,
-  (error: any) => {
+  (response) => response,
+  (error) => {
     const { response } = error;
     
     if (response && response.status === 401) {
@@ -141,30 +141,7 @@ export const bidsAPI = {
 
 // Admin API calls
 export const adminAPI = {
-  getAllUsers: () => api.get('/admin/users'),
-  
-  getUserById: (id: string) => api.get(`/admin/users/${id}`),
-  
-  updateUser: (id: string, data: any) => 
-    api.put(`/admin/users/${id}`, data),
-  
-  deleteUser: (id: string) => 
-    api.delete(`/admin/users/${id}`),
-    
-  getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  getAllUsers: () => api.get('/admin/users')
 };
 
-// Users API calls
-export const usersAPI = {
-  getAll: () => api.get('/users'),
-};
-
-// Default export for backward compatibility
-export default {
-  auth: authAPI,
-  auctions: auctionsAPI,
-  bids: bidsAPI,
-  vehicles: vehiclesAPI,
-  users: usersAPI,
-  admin: adminAPI,
-};
+export default api;

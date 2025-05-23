@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, SortAsc, SortDesc, Clock, Gavel, Eye, Heart } from 'lucide-react';
 import Navbar from '../components/navbar';
 import CountdownTimer from '../components/CountdownTimer';
-import { fetchFromAPI } from "../../../backend/src/api/api.ts";
+import { auctionsAPI } from "../services/apiService";
 import '../styles/auctions.css';
 
 interface Auction {
@@ -52,15 +52,25 @@ const Auctions: React.FC = () => {
         { value: 'price-low', label: 'Price: Low to High' },
         { value: 'price-high', label: 'Price: High to Low' },
         { value: 'most-bids', label: 'Most Bids' }
-    ];
-
-    useEffect(() => {
+    ];    useEffect(() => {
         const fetchAuctions = async () => {
             try {
                 setLoading(true);
-                const response = await fetchFromAPI('auctions', 'GET');
+                // Use the auctionsAPI service to fetch auctions
+                const response = await auctionsAPI.getAll({
+                    category: selectedCategory !== 'all' ? selectedCategory : undefined,
+                    search: searchQuery || undefined,
+                    sort: sortBy || undefined
+                });
                 
-                // Mock data for demonstration
+                // Check if we have real data from the API
+                if (response.data && Array.isArray(response.data)) {
+                    setAuctions(response.data);
+                    setLoading(false);
+                    return;
+                }
+                
+                // Mock data for demonstration (fallback)
                 const mockAuctions: Auction[] = [
                     {
                         auction_id: '1',

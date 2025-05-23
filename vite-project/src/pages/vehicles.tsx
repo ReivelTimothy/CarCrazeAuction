@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, Grid, List, Car, Gauge, Calendar, Palette, Fuel, Settings, Eye, Heart } from 'lucide-react';
 import Navbar from '../components/navbar';
-import { fetchFromAPI } from "../../../backend/src/api/api.ts";
+import { vehiclesAPI } from "../services/apiService";
 import '../styles/vehicles.css';
 
 interface Vehicle {
@@ -59,13 +59,28 @@ const Vehicles: React.FC = () => {
         { value: 'price-high', label: 'Price: High to Low' },
         { value: 'mileage-low', label: 'Mileage: Low to High' },
         { value: 'mileage-high', label: 'Mileage: High to Low' }
-    ];
-
-    useEffect(() => {
+    ];    useEffect(() => {
         const fetchVehicles = async () => {
             try {
                 setLoading(true);
-                const response = await fetchFromAPI('vehicles', 'GET');
+                // Use the vehiclesAPI service to fetch vehicles
+                const response = await vehiclesAPI.getAll({
+                    brand: selectedBrand !== 'all' ? selectedBrand : undefined,
+                    type: selectedType !== 'all' ? selectedType : undefined,
+                    minPrice: priceRange[0],
+                    maxPrice: priceRange[1],
+                    minYear: yearRange[0],
+                    maxYear: yearRange[1],
+                    sort: sortBy,
+                    search: searchQuery || undefined
+                });
+                
+                // Check if we have real data from the API
+                if (response.data && Array.isArray(response.data)) {
+                    setVehicles(response.data);
+                    setLoading(false);
+                    return;
+                }
                 
                 // Mock data for demonstration
                 const mockVehicles: Vehicle[] = [

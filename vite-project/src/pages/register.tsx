@@ -74,8 +74,7 @@ const Register: React.FC = () => {
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -86,17 +85,26 @@ const Register: React.FC = () => {
     setError(null);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Import authAPI dynamically to avoid circular dependencies
+      const { authAPI } = await import('../services/apiService');
       
-      // In a real app, you would make an API call to register the user:
-      // const response = await registerUser(formData);
+      // Use authAPI to register user
+      await authAPI.register({
+        username: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phoneNumber,
+      });
       
       // After successful registration, redirect to login
-      // TODO: Replace with actual registration logic
       navigate('/login', { state: { registered: true } });
-    } catch (err) {
-      setError('Registration failed. Please try again later.');
+    } catch (err: any) {
+      // Handle error responses from API
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Registration failed. Please try again later.');
+      }
       console.error('Registration error:', err);
     } finally {
       setLoading(false);

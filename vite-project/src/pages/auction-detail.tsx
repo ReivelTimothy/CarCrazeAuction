@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Car, Clock, Users, Gavel, Heart, Share2, AlertCircle, CheckCircle } from 'lucide-react';
 import Navbar from '../components/navbar';
 import CountdownTimer from '../components/CountdownTimer';
-import { fetchFromAPI } from "../../../backend/src/api/api.ts";
+import { auctionsAPI, bidsAPI } from "../services/apiService";
 import '../styles/auction-detail.css';
 
 interface Auction {
@@ -57,14 +57,16 @@ const AuctionDetail: React.FC = () => {
         try {
             setLoading(true);
             
-            // Fetch auction details
-            const auctionData = await fetchFromAPI(`/auction/${id}/getAuction`, "GET");
-            setAuction(auctionData);
+            // Fetch auction details using the auctionsAPI service
+            const auctionResponse = await auctionsAPI.getById(id);
+            setAuction(auctionResponse.data);
             
-            // Fetch highest bid
+            // Fetch highest bid using the bidsAPI service
             try {
-                const bidData = await fetchFromAPI(`/bid/${id}/getHighestBid`, "GET");
-                setBids([bidData]);
+                const bidResponse = await bidsAPI.getHighestBid(id);
+                if (bidResponse.data) {
+                    setBids([bidResponse.data]);
+                }
             } catch (bidError) {
                 // No bids yet
                 setBids([]);
@@ -105,9 +107,7 @@ const AuctionDetail: React.FC = () => {
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         
         return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    };
-
-    const handlePlaceBid = async (e: React.FormEvent) => {
+    };    const handlePlaceBid = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!auction || !bidAmount) return;
@@ -122,17 +122,23 @@ const AuctionDetail: React.FC = () => {
             setPlacingBid(true);
             setError('');
             
-            await fetchFromAPI(`/bid/${auction.auction_id}/updateBidPrice`, "PUT", {
-                amount: bidValue,
-                vehicle_id: auction.vehicle.vehicle_id
+            // Use the bidsAPI service to place a bid
+            await bidsAPI.updateBidPrice(auction.auction_id, {
+                amount: bidValue
             });
             
             setSuccess('Bid placed successfully!');
             setBidAmount('');
             
             // Refresh auction data
-            const updatedAuction = await fetchFromAPI(`/auction/${id}/getAuction`, "GET");
-            setAuction(updatedAuction);
+            const auctionResponse = await auctionsAPI.getById(id!);
+            setAuction(auctionResponse.data);
+            
+            // Get updated highest bid
+            const bidResponse = await bidsAPI.getHighestBid(id!);
+            if (bidResponse.data) {
+                setBids([bidResponse.data]);
+            }
             
         } catch (error) {
             console.error("Error placing bid:", error);
