@@ -10,12 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@types/react-router-dom": "^5.3.3",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.12.1",
+    "lucide-react": "^0.511.0",
     "mysql2": "^3.14.1",
     "pg": "^8.16.0",
     "pg-hstore": "^2.3.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.5.2",
     "react-router-dom": "^7.6.0",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
