@@ -3,6 +3,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "react-tabs": "^6.1.0",
     "sequelize-typescript": "^2.1.6",
     "uuid": "^11.1.0"
   },
@@ -10,6 +11,7 @@
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/react-tabs": "^5.0.4",
     "@types/uuid": "^10.0.0"
   }
 }

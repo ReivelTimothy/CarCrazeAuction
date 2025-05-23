@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, SortAsc, SortDesc, Clock, Gavel, Eye, Heart } from 'lucide-react';
 import Navbar from '../components/navbar';
+import CountdownTimer from '../components/CountdownTimer';
 import { fetchFromAPI } from "../../../backend/src/api/api.ts";
 import '../styles/auctions.css';
 
@@ -382,12 +383,14 @@ const Auctions: React.FC = () => {
                                                         <Gavel size={14} />
                                                         {auction.bidCount} bids
                                                     </div>
-                                                </div>
-
-                                                <div className="time-info">
+                                                </div>                                                <div className="time-info">
                                                     <div className="time-remaining">
                                                         <Clock size={14} />
-                                                        {formatTimeRemaining(auction.endDate)}
+                                                        <CountdownTimer 
+                                                            endDate={auction.endDate}
+                                                            size="sm"
+                                                            showLabels={false}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>

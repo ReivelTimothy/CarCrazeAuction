@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Search, Car, Heart, Menu, LogOut, Bell, User, Gavel, X,
-  ChevronDown, ChevronUp, AlertCircle
+  ChevronDown, ChevronUp, ArrowLeft
 } from 'lucide-react';
 import '../styles/navbar.css';
 
@@ -19,6 +19,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -188,6 +189,14 @@ const Navbar: React.FC = () => {
             />
           </form>
 
+          {/* Mobile Search Button */}
+          <button 
+            className="mobile-search-btn"
+            onClick={() => setIsMobileSearchOpen(true)}
+          >
+            <Search size={18} />
+          </button>
+
           {user ? (
             <>
               {/* Notifications */}
@@ -263,6 +272,32 @@ const Navbar: React.FC = () => {
             <Menu size={20} />
           </button>
         </div>
+      </div>
+
+      {/* Mobile Search Overlay */}
+      <div className={`navbar-search-overlay ${isMobileSearchOpen ? 'active' : ''}`}>
+        <div className="search-overlay-header">
+          <button 
+            onClick={() => setIsMobileSearchOpen(false)}
+            className="search-overlay-close"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <h3>Search</h3>
+        </div>
+        <form onSubmit={(e) => {
+          handleSearch(e);
+          setIsMobileSearchOpen(false);
+        }} className="search-overlay-form">
+          <input
+            type="text"
+            placeholder="Search auctions, vehicles..."
+            className="search-overlay-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+        </form>
       </div>
     </nav>
   );

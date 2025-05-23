@@ -216,10 +216,43 @@
   right: 1rem;
   padding: 0.5rem 1rem;
   background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   color: white;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom styling for CountdownTimer in home page auction cards */
+.auction-timer .countdown-timer {
+  display: inline-flex;
+  margin-left: 0.5rem;
+}
+
+.auction-timer .countdown-container {
+  gap: 4px;
+}
+
+.auction-timer .countdown-unit {
+  min-width: 22px;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auction-timer .countdown-value {
+  font-size: 0.75rem;
+  padding: 1px 0;
+  background: transparent;
+  border: none;
+}
+
+.auction-timer .countdown-expired {
+  font-size: 0.75rem;
+  animation: none;
 }
 
 .auction-content {
@@ -407,13 +440,64 @@
 }
 
 /* Responsive Design */
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 992px) {
+  .hero-section {
+    min-height: 70vh;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+    padding: 0 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .cta-section {
+    padding: 4rem 1.5rem;
+  }
+  
+  .featured-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .featured-heading-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+  }
+
   .hero-title {
     font-size: 2.5rem;
   }
   
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
   .hero-stats {
-    gap: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .hero-stat {
+    flex: 0 0 calc(50% - 1rem);
+    padding: 1rem;
   }
   
   .hero-stat-number {
@@ -429,14 +513,67 @@
   }
   
   .categories-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .category-card {
+    height: 130px;
+    padding: 1rem;
+  }
+  
+  .category-card-title {
+    font-size: 1.1rem;
+  }
+  
+  .testimonial-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-container {
+    padding: 3rem 1rem;
+  }
+  
+  .section-header {
+    margin-bottom: 2rem;
+  }
+  
+  .filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .cta-title {
+    font-size: 1.75rem;
+  }
+  
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
+  .hero-content {
+    padding: 0 1rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+  
   .hero-actions {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
   }
   
   .hero-btn {
@@ -444,7 +581,82 @@
     max-width: 280px;
   }
   
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .auction-card-image {
+    height: 180px;
+  }
+  
+  .auction-card-title {
+    font-size: 1.1rem;
+  }
+  
+  .auction-card-price {
+    font-size: 1.25rem;
+  }
+  
   .auction-actions {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .auction-btn {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .testimonial-card {
+    padding: 1.25rem;
+  }
+  
+  .testimonial-quote {
+    font-size: 0.95rem;
+  }
+  
+  .faq-question {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+  
+  .faq-answer {
+    font-size: 0.9rem;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-stats {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .hero-stat {
+    flex: none;
+    width: 100%;
+  }
+  
+  .category-card {
+    height: 110px;
+  }
+  
+  .auction-card-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .auction-card-bids {
+    width: 100%;
+  }
+  
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .cta-btn {
+    width: 100%;
   }
 }

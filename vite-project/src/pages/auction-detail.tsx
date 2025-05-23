@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Car, Clock, Users, Gavel, Heart, Share2, AlertCircle, CheckCircle } from 'lucide-react';
 import Navbar from '../components/navbar';
+import CountdownTimer from '../components/CountdownTimer';
 import { fetchFromAPI } from "../../../backend/src/api/api.ts";
 import '../styles/auction-detail.css';
 
@@ -50,47 +51,47 @@ const AuctionDetail: React.FC = () => {
     const [bidAmount, setBidAmount] = useState('');
     const [placingBid, setPlacingBid] = useState(false);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [success, setSuccess] = useState('');    const fetchAuctionDetails = async () => {
+        if (!id) return;
+        
+        try {
+            setLoading(true);
+            
+            // Fetch auction details
+            const auctionData = await fetchFromAPI(`/auction/${id}/getAuction`, "GET");
+            setAuction(auctionData);
+            
+            // Fetch highest bid
+            try {
+                const bidData = await fetchFromAPI(`/bid/${id}/getHighestBid`, "GET");
+                setBids([bidData]);
+            } catch (bidError) {
+                // No bids yet
+                setBids([]);
+            }
+            
+        } catch (error) {
+            console.error("Error fetching auction details:", error);
+            setError("Failed to load auction details.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchAuctionDetails = async () => {
-            try {
-                setLoading(true);
-                
-                // Fetch auction details
-                const auctionData = await fetchFromAPI(`/auction/${id}/getAuction`, "GET");
-                setAuction(auctionData);
-                
-                // Fetch highest bid
-                try {
-                    const bidData = await fetchFromAPI(`/bid/${id}/getHighestBid`, "GET");
-                    setBids([bidData]);
-                } catch (bidError) {
-                    // No bids yet
-                    setBids([]);
-                }
-                
-            } catch (error) {
-                console.error("Error fetching auction details:", error);
-                setError("Failed to load auction details.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (id) {
             fetchAuctionDetails();
         }
-    }, [id]);
-
-    const formatPrice = (price: number) => {
+    }, [id]);    const formatPrice = (price: number) => {
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
         }).format(price);
     };
-
+    
+    // Note: formatTimeRemaining is kept for compatibility but no longer used in the UI
+    // The CountdownTimer component is used instead
     const formatTimeRemaining = (endDate: string) => {
         const end = new Date(endDate);
         const now = new Date();
@@ -223,14 +224,19 @@ const AuctionDetail: React.FC = () => {
                                     <span className="auction-category">{auction.category}</span>
                                     <span className="auction-year">{auction.vehicle.year}</span>
                                 </div>
-                            </div>
-
-                            {/* Timer */}
+                            </div>                            {/* Timer */}
                             <div className="auction-timer-card">
                                 <Clock size={24} />
-                                <div>
+                                <div className="timer-content">
                                     <div className="timer-label">Time Remaining</div>
-                                    <div className="timer-value">{formatTimeRemaining(auction.endDate)}</div>
+                                    <CountdownTimer 
+                                        endDate={auction.endDate}
+                                        size="lg"
+                                        onExpire={() => {
+                                            // Refresh auction details to update status
+                                            fetchAuctionDetails();
+                                        }}
+                                    />
                                 </div>
                             </div>
 

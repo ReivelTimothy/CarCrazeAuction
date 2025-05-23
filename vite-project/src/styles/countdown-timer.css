@@ -1,0 +1,122 @@
+/* Countdown Timer styles */
+.countdown-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-container {
+  display: flex;
+  gap: 10px;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.countdown-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+}
+
+.countdown-label {
+  font-size: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.countdown-expired {
+  color: var(--accent-danger);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Small size */
+.countdown-timer.sm .countdown-unit {
+  padding: 4px;
+  min-width: 40px;
+}
+
+.countdown-timer.sm .countdown-value {
+  font-size: 0.9rem;
+  padding: 4px 0;
+}
+
+.countdown-timer.sm .countdown-label {
+  font-size: 0.5rem;
+}
+
+/* Medium size */
+.countdown-timer.md .countdown-unit {
+  padding: 5px;
+  min-width: 50px;
+}
+
+.countdown-timer.md .countdown-value {
+  font-size: 1.2rem;
+  padding: 5px 0;
+}
+
+.countdown-timer.md .countdown-label {
+  font-size: 0.6rem;
+}
+
+/* Large size */
+.countdown-timer.lg .countdown-unit {
+  padding: 8px;
+  min-width: 70px;
+}
+
+.countdown-timer.lg .countdown-value {
+  font-size: 1.8rem;
+  padding: 8px 0;
+}
+
+.countdown-timer.lg .countdown-label {
+  font-size: 0.75rem;
+}
+
+/* Premium effect on hover */
+.countdown-unit:hover .countdown-value {
+  background: var(--gradient-primary);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .countdown-timer.lg .countdown-unit {
+    padding: 6px;
+    min-width: 55px;
+  }
+  
+  .countdown-timer.lg .countdown-value {
+    font-size: 1.4rem;
+  }
+}

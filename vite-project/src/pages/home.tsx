@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Car, Eye, Gavel, ArrowRight, Clock } from 'lucide-react';
 import Navbar from '../components/navbar';
+import CountdownTimer from '../components/CountdownTimer';
 import { fetchFromAPI } from "../../../backend/src/api/api.ts";
 import '../styles/home.css';
 
@@ -225,10 +226,13 @@ const Home: React.FC = () => {
                                     <Car size={60} className="auction-image-placeholder" />
                                     <div className={`auction-status ${getStatusColor(auction.status)}`}>
                                         {auction.status}
-                                    </div>
-                                    <div className="auction-timer">
+                                    </div>                                    <div className="auction-timer">
                                         <Clock size={16} style={{ marginRight: '0.5rem' }} />
-                                        {formatTimeRemaining(auction.endDate)}
+                                        <CountdownTimer 
+                                            endDate={auction.endDate}
+                                            size="sm" 
+                                            showLabels={false}
+                                        />
                                     </div>
                                 </div>
                                 
