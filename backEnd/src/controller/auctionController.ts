@@ -37,7 +37,11 @@ export const getAllAuctions = async (req: any, res: any) => {
 // 3. Get Auction by ID
 export const getAuctionById = async (req: any, res: any) => {
     try {
-        const auctionId = req.params.id;
+        // Use auction_id from params to match the route parameter name
+        const auctionId = req.params.auction_id;
+        
+        console.log("Fetching auction with ID:", auctionId);
+        
         const auction = await Auction.findOne({ where: { auction_id: auctionId } });
         if (!auction) {
             return res.status(404).json({ message: "Auction not found" });
@@ -51,8 +55,12 @@ export const getAuctionById = async (req: any, res: any) => {
 // 4. Update Auction status
 export const updateAuctionStatus = async (req: any, res: any) => {
     try {
-        const auctionId = req.params.id;
+        // Use auction_id from params to match the route parameter name
+        const auctionId = req.params.auction_id;
         const { status } = req.body;
+        
+        console.log("Updating auction status for ID:", auctionId, "to:", status);
+        
         const auction = await Auction.findOne({ where: { auction_id: auctionId } });
         if (!auction) {
             return res.status(404).json({ message: "Auction not found" });

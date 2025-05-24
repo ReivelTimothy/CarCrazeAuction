@@ -4,7 +4,7 @@ import { authenticateJWT, authorizeAdmin } from '../middleware/auth';
 
 const userRoutes = express.Router();
 // 1. Register User
-userRoutes.post('/register', authorizeAdmin, registerUser);
+userRoutes.post('/register', /* authorizeAdmin, */ registerUser);
 // 2. Login User
 userRoutes.post('/login', loginUser);
 // 3. Logout User

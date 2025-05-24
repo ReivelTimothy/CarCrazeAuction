@@ -46,35 +46,60 @@ export const logoutUser = async (req: any, res: any) => {
 // 3. Login User
 export const loginUser = async (req: any, res: any) => {
     try {
+        console.log("Login request body:", req.body);
         const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
 
-        // Find the user by email
-        const user = await User.findOne({ where: { email } });
-        if (!user) {
-            const admin = await Admin.findOne({ where: { email } });
-            if (!admin) {
-                return res.status(401).json({ message: 'Invalid email or password' });  
-            } else {
-                // Check if the password is correct
+        // Make sure email is a string
+        const emailStr = typeof email === 'string' ? email : String(email);
+        console.log("Email being used for query:", emailStr);
+        
+        // First try to find a user with the email
+        try {
+            const user = await User.findOne({
+                where: {
+                    email: emailStr
+                }
+            });
+
+            if (user) {
+                // Check if the user password is correct
+                if (user.password !== password) {
+                    return res.status(401).json({ message: 'Invalid email or password' });
+                }
+                
+                // Generate a token for the user
+                const token = generateToken(user.user_id, "user");
+                return res.status(200).json({ message: 'Login successful', token });
+            }
+            
+            // If no user was found, check for an admin
+            const admin = await Admin.findOne({
+                where: {
+                    email: emailStr
+                }
+            });
+            
+            if (admin) {
+                // Check if the admin password is correct
                 if (admin.password !== password) {
                     return res.status(401).json({ message: 'Invalid email or password' });
                 }
+                
                 // Generate a token for the admin
-                const token = generateToken(admin.admin_id,"admin");
-                return res.status(200).json({ message: 'Login successful', token ,  });
+                const token = generateToken(admin.admin_id, "admin");
+                return res.status(200).json({ message: 'Login successful', token });
             }
+            
+            // If we get here, neither user nor admin was found
             return res.status(401).json({ message: 'Invalid email or password' });
+        } catch (queryError) {
+            console.error('Error querying database:', queryError);
+            return res.status(500).json({ message: 'Database query error' });
         }
-
-        // Check if the password is correct
-        if (user.password !== password) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        // Generate a token for the user
-        const token = generateToken(user.user_id,"user");
-        
-        return res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
         console.error('Error logging in user:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -105,8 +130,10 @@ export const getUserProfile = async (req: any, res: any) => {
 // 5. Update User Profile
 export const updateUserProfile = async (req: any, res: any) => {
     try {
-        const userId = req.userId; // Assuming you have middleware to extract userId from token
+        const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
         const { username, email, phoneNum } = req.body;
+        
+        console.log("Update Profile Request:", { userId, username, email, phoneNum });
 
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });
@@ -130,7 +157,9 @@ export const updateUserProfile = async (req: any, res: any) => {
 // 6. Delete User Profile
 export const deleteUserProfile = async (req: any, res: any) => {
     try {
-        const userId = req.userId; // Assuming you have middleware to extract userId from token
+        const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
+        
+        console.log("Delete Profile Request:", { userId });
 
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });

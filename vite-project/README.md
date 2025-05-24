@@ -1,13 +1,23 @@
-# React + TypeScript + Vite
+# CarCrazeAuction Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern and responsive frontend for the CarCrazeAuction platform, built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- User authentication (login/register)
+- Browse active auctions
+- View detailed auction information
+- Place bids on active auctions
+- User profile management
+- Create new vehicle auctions
 
-## Expanding the ESLint configuration
+## Technologies Used
+
+- React: A JavaScript library for building user interfaces
+- TypeScript: Typed JavaScript at any scale
+- Vite: Next Generation Frontend Tooling
+- React Router: Declarative routing for React
+- Modern CSS with custom variables and responsive design
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 

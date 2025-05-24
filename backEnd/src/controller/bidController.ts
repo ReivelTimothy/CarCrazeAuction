@@ -40,4 +40,38 @@ export const updateBidPrice = async (req: any, res: any) => {
     }
 }
 
+// 3. Place a new bid
+export const placeBid = async (req: any, res: any) => {
+    try {
+        const auction_id = req.params.auction_id;
+        const { amount } = req.body;
+        const user_id = req.body.userId; // From JWT token middleware
+        
+        if (!auction_id || !amount || !user_id) {
+            return res.status(400).json({ message: "Missing required fields: auction_id, amount, or user not authenticated" });
+        }
+        
+        // Create a new bid
+        const newBid = await Bid.create({
+            auction_id,
+            user_id,
+            amount,
+            bidTime: new Date()
+        });
+        
+        // Update auction's current price
+        const { Auction } = require('../../models/auction');
+        const auction = await Auction.findOne({ where: { auction_id } });
+        if (auction && amount > auction.currentPrice) {
+            auction.currentPrice = amount;
+            await auction.save();
+        }
+        
+        res.status(201).json(newBid);
+    } catch (error) {
+        console.error("Error placing bid:", error);
+        res.status(500).json({ message: "Error placing bid", error });
+    }
+}
+
 
