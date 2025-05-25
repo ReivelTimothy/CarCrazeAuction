@@ -100,7 +100,7 @@ const Home: React.FC = () => {
                         >
                             <div className="auction-image">
                                 {auction.image ? (
-                                    <img src={auction.image} alt={auction.title} />
+                                    <img src={`/assets/${auction.image}`} alt={auction.title} />
                                 ) : (
                                     <div className="placeholder-image">
                                         <span>{auction.vehicle?.brand || 'Car'}</span>
