@@ -21,7 +21,6 @@ export interface Vehicle {
   condition: string;
   documents: string;
   name: string;
-  price: number;
 }
 
 // Auction types

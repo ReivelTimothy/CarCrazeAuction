@@ -52,7 +52,7 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     if (fileInput.files && fileInput.files[0]) {
       setAuctionData(prev => ({
         ...prev,
-        image: fileInput.files![0] // Simpan File, bukan nama file
+        image: fileInput.files![0] 
       }));
     }
   } else {
@@ -105,12 +105,15 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     const newVehicle = await createVehicle(vehicleData);
 
     // Siapkan data untuk FormData (perhatikan field startPrice dan image)
+  
     const auctionPayload: any = {
       title: auctionData.title,
       description: auctionData.description,
-      startPrice: auctionData.startingPrice, // field sesuai service
+      startingPrice: auctionData.startingPrice,
+      status: auctionData.status,
+      category: auctionData.category,
+      image: auctionData.image ,
       vehicle_id: newVehicle.vehicle_id,
-      image: auctionData.image // File object
     };
 
     // Kirim ke service

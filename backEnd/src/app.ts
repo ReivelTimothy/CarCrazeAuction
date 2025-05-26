@@ -24,7 +24,6 @@ const sequelize = new Sequelize({
     ...config.development,
     models: [User, Admin, Vehicle, Auction, Bid, Transaction],
 });
-
     
 
 sequelize.authenticate()
@@ -41,6 +40,7 @@ app.use('/admin', adminRoutes);
 app.use('/transaction', transactionRoutes);
 app.use('/bid', bidRoutes);
 app.use('/auction', auctionRoutes);
+app.use('/uploads', express.static('uploads')); // Serve static files from the uploads directory
 // ------------------------------------
 
 

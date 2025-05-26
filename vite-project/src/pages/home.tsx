@@ -38,8 +38,8 @@ const Home: React.FC = () => {
                             return auction;
                         }
                     })
+                    
                 );
-                
                 setAuctions(auctionsWithVehicles);
             } catch (error) {
                 console.error("Error fetching auctions:", error);
@@ -48,7 +48,6 @@ const Home: React.FC = () => {
                 setIsLoading(false);
             }
         };
-        
         fetchAuctions();
     }, []);
 
@@ -71,7 +70,8 @@ const Home: React.FC = () => {
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         
         return `${days} days ${hours} hours left`;
-    };    return (
+    };    
+    return (
         <div className="home-container">
             <div className="home-header">
                 <h1>Car Craze Auction</h1>
@@ -100,7 +100,7 @@ const Home: React.FC = () => {
                         >
                             <div className="auction-image">
                                 {auction.image ? (
-                                    <img src={auction.image} alt={auction.title} />
+                                    <img src={`http://localhost:3000/uploads/${auction.image}`} alt={auction.title} />
                                 ) : (
                                     <div className="placeholder-image">
                                         <span>{auction.vehicle?.brand || 'Car'}</span>

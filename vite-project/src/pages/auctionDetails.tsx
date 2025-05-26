@@ -194,7 +194,7 @@ const AuctionDetails: React.FC = () => {
         <div className="auction-main-info">
           <div className="auction-image-gallery">
             {auction.image ? (
-              <img src={auction.image} alt={auction.title} />
+              <img src={`http://localhost:3000/uploads/${auction.image}`} alt={auction.title} />
             ) : (
               <div className="placeholder-image">
                 <span>{vehicle?.brand || 'Vehicle'}</span>
