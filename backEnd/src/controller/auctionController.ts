@@ -4,6 +4,8 @@ import { Auction } from "../../models/auction";
 export const createAuction = async (req: any, res: any) => {
     try {
         const { vehicle_id, title, description, startingPrice, status, category } = req.body;
+        const image = req.file ? req.file.filename : null; // Save only filename or use req.file.path for full path
+
         const auction = await Auction.create({
             vehicle_id,
             title,
@@ -11,10 +13,10 @@ export const createAuction = async (req: any, res: any) => {
             startingPrice,
             currentPrice: startingPrice, 
             startDate : new Date(),
-            endDate : new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000), // default to 7 days from now
+            endDate : new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
             status,
             category,
-            image : null // default to null
+            image // Save image filename/path
         });
         res.status(201).json(auction);
     } catch (error) {

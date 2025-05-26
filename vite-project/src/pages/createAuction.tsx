@@ -6,7 +6,7 @@ import '../styles/createAuction.css';
 
 const CreateAuction: React.FC = () => {
   const navigate = useNavigate();
-  
+
   // Vehicle form state
   const [vehicleData, setVehicleData] = useState({
     type: '',
@@ -22,20 +22,21 @@ const CreateAuction: React.FC = () => {
     name: '',
     price: 0
   });
-  
+
   // Auction form state
   const [auctionData, setAuctionData] = useState({
     title: '',
     description: '',
     startingPrice: 0,
-    status: 'pending',
-    category: 'Cars'
+    status: 'pending' as 'pending' | 'active' | 'closed',
+    category: 'Cars',
+    image: '' as string | File
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1); // 1 for vehicle info, 2 for auction info
-  
+
   const handleVehicleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setVehicleData(prev => ({
@@ -43,26 +44,37 @@ const CreateAuction: React.FC = () => {
       [name]: name === 'year' || name === 'mileage' || name === 'price' ? Number(value) : value
     }));
   };
-  
-  const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+
+const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const { name, value, type } = e.target;
+  if (type === 'file' && name === 'image') {
+    const fileInput = e.target as HTMLInputElement;
+    if (fileInput.files && fileInput.files[0]) {
+      setAuctionData(prev => ({
+        ...prev,
+        image: fileInput.files![0] // Simpan File, bukan nama file
+      }));
+    }
+  } else {
     setAuctionData(prev => ({
       ...prev,
       [name]: name === 'startingPrice' ? Number(value) : value
     }));
-  };
-  
+  }
+};
+
   const handleNextStep = () => {
     // Validate vehicle data
     if (!vehicleData.brand || !vehicleData.model || !vehicleData.type) {
       setError('Please fill all required vehicle fields');
       return;
     }
-    
+    console.log(auctionData);
+
     // Proceed to next step
     setStep(2);
     setError(null);
-    
+
     // Pre-fill auction title
     setAuctionData(prev => ({
       ...prev,
@@ -70,50 +82,55 @@ const CreateAuction: React.FC = () => {
       startingPrice: vehicleData.price
     }));
   };
-  
+
   const handlePreviousStep = () => {
     setStep(1);
     setError(null);
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    
-    // Validate auction data
-    if (!auctionData.title || !auctionData.description || auctionData.startingPrice <= 0) {
-      setError('Please fill all required auction fields');
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      // Create the vehicle first
-      const newVehicle = await createVehicle(vehicleData);
-      
-      // Create the auction with the new vehicle ID
-      const newAuction = await createAuction({
-        ...auctionData,
-        vehicle_id: newVehicle.vehicle_id
-      });
-      
-      // Navigate to the new auction page
-      navigate(`/auction/${newAuction.auction_id}`);
-    } catch (err: any) {
-      console.error('Error creating auction:', err);
-      setError(err.message || 'Failed to create auction. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+  e.preventDefault();
+  setError(null);
+
+  // Validate auction data
+  if (!auctionData.title || !auctionData.description || auctionData.startingPrice <= 0) {
+    setError('Please fill all required auction fields');
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // Create the vehicle first
+    const newVehicle = await createVehicle(vehicleData);
+
+    // Siapkan data untuk FormData (perhatikan field startPrice dan image)
+    const auctionPayload: any = {
+      title: auctionData.title,
+      description: auctionData.description,
+      startPrice: auctionData.startingPrice, // field sesuai service
+      vehicle_id: newVehicle.vehicle_id,
+      image: auctionData.image // File object
+    };
+
+    // Kirim ke service
+    const newAuction = await createAuction(auctionPayload);
+
+    navigate(`/auction/${newAuction.auction_id}`);
+  } catch (err: any) {
+    console.error('Error creating auction:', err);
+    setError(err.message || 'Failed to create auction. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <div className="create-auction-container">
       <h1 className="page-title">Create New Auction</h1>
-      
+
       {error && <div className="error-message">{error}</div>}
-      
+
       <div className="steps-indicator">
         <div className={`step ${step === 1 ? 'active' : (step > 1 ? 'completed' : '')}`}>
           <div className="step-number">1</div>
@@ -125,7 +142,7 @@ const CreateAuction: React.FC = () => {
           <div className="step-label">Auction Details</div>
         </div>
       </div>
-      
+
       {step === 1 ? (
         <div className="form-section">
           <h2>Vehicle Information</h2>
@@ -141,7 +158,7 @@ const CreateAuction: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="model">Model *</label>
               <input
@@ -153,7 +170,7 @@ const CreateAuction: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="type">Vehicle Type *</label>
@@ -175,7 +192,7 @@ const CreateAuction: React.FC = () => {
                   <option value="Wagon">Wagon</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="year">Year</label>
                 <input
@@ -189,7 +206,7 @@ const CreateAuction: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="color">Color</label>
@@ -201,7 +218,7 @@ const CreateAuction: React.FC = () => {
                   onChange={handleVehicleChange}
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="mileage">Mileage (km)</label>
                 <input
@@ -214,7 +231,7 @@ const CreateAuction: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="transmissionType">Transmission</label>
@@ -230,7 +247,7 @@ const CreateAuction: React.FC = () => {
                   <option value="Semi-automatic">Semi-automatic</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="fuelType">Fuel Type</label>
                 <select
@@ -247,7 +264,7 @@ const CreateAuction: React.FC = () => {
                 </select>
               </div>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="condition">Condition</label>
@@ -262,7 +279,7 @@ const CreateAuction: React.FC = () => {
                   <option value="Certified Pre-owned">Certified Pre-owned</option>
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="price">Base Price ($)</label>
                 <input
@@ -275,7 +292,7 @@ const CreateAuction: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="documents">Documents</label>
               <textarea
@@ -286,7 +303,7 @@ const CreateAuction: React.FC = () => {
                 placeholder="List all available documents (e.g., service history, ownership papers, etc.)"
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="name">Vehicle Name</label>
               <input
@@ -298,7 +315,17 @@ const CreateAuction: React.FC = () => {
                 placeholder="Custom name for this vehicle (optional)"
               />
             </div>
-            
+
+            <div className="form-group">
+              <label htmlFor="image">Vehicle Image</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                onChange={handleAuctionChange}
+              />
+            </div>
+
             <div className="form-actions">
               <button
                 type="button"
@@ -325,7 +352,7 @@ const CreateAuction: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="description">Description *</label>
               <textarea
@@ -338,7 +365,7 @@ const CreateAuction: React.FC = () => {
                 rows={5}
               ></textarea>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="startingPrice">Starting Price ($) *</label>
@@ -352,7 +379,7 @@ const CreateAuction: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="category">Category</label>
                 <select
@@ -370,7 +397,7 @@ const CreateAuction: React.FC = () => {
                 </select>
               </div>
             </div>
-            
+
             <div className="form-actions">
               <button
                 type="button"

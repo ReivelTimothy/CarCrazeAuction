@@ -25,6 +25,8 @@ const sequelize = new Sequelize({
     models: [User, Admin, Vehicle, Auction, Bid, Transaction],
 });
 
+    
+
 sequelize.authenticate()
     .then(() => console.log('Database connected successfully!'))
     .catch(err => {
