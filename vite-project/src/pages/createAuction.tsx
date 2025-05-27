@@ -115,8 +115,6 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
       image: auctionData.image ,
       vehicle_id: newVehicle.vehicle_id,
     };
-
-    // Kirim ke service
     const newAuction = await createAuction(auctionPayload);
 
     navigate(`/auction/${newAuction.auction_id}`);
@@ -127,7 +125,6 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     setLoading(false);
   }
 };
-
   return (
     <div className="create-auction-container">
       <h1 className="page-title">Create New Auction</h1>

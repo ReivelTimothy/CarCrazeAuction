@@ -21,8 +21,9 @@ export const createAuction = (auctionData: Partial<Auction>): Promise<Auction> =
   if (auctionData.vehicle_id) formData.append('vehicle_id', auctionData.vehicle_id);
   if (auctionData.image) {
     console.log("Image path:", auctionData.image);
-    formData.append('image', "../../backEnd./updload/"+auctionData.image);
+    formData.append('image', auctionData.image);
   }
+  console.log("FormData:", formData.get('image'));
 
   return fetch('http://localhost:3000/auction/createAuction', {
     method: 'POST',
