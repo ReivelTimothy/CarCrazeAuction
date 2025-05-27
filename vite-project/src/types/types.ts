@@ -32,7 +32,7 @@ export interface Auction {
   currentPrice: number;
   startDate: string | Date;
   endDate: string | Date;
-  status: 'active' | 'closed' | 'pending';
+  status: 'OPEN' | 'closed' | 'pending';
   category: string;
   image: string | null;
   vehicle_id: string;

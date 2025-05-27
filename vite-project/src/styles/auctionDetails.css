@@ -331,6 +331,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   min-width: 140px;
+  margin-right: 7px;
 }
 
 .bid-button::before {

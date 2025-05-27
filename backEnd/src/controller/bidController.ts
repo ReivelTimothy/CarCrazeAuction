@@ -27,8 +27,8 @@ export const getHighestBid = async (req: any, res: any) => {
 export const updateBidPrice = async (req: any, res: any) => {
     try {
         const {vehicle_id, amount} = req.body;
-        const user_id = req.params.user_id;
-        const bid = await Bid.findOne({ where: { user_id, vehicle_id } });
+        const userId = req.body.userId;
+        const bid = await Bid.findOne({ where: { userId, vehicle_id } });
         if (!bid) {
             return res.status(404).json({ message: "Bid not found" });
         }
@@ -42,11 +42,13 @@ export const updateBidPrice = async (req: any, res: any) => {
 
 // 3. Place a new bid
 export const placeBid = async (req: any, res: any) => {
+    console.log("Place Bid Request:", req.body);
     try {
+        
         const auction_id = req.params.auction_id;
         const { amount } = req.body;
-        const user_id = req.body.userId; // From JWT token middleware
-        
+        const {user_id} = req.body;
+        console.log("Placing bid for auction:", auction_id, "with amount:", amount, "by user:", user_id);
         if (!auction_id || !amount || !user_id) {
             return res.status(400).json({ message: "Missing required fields: auction_id, amount, or user not authenticated" });
         }

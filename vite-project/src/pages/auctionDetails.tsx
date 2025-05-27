@@ -24,7 +24,8 @@ const AuctionDetails: React.FC = () => {
   useEffect(() => {
     const fetchAuctionDetails = async () => {
       if (!id) return;
-      
+      console.log("Fetching auction details for ID:", id);
+      console.log("User in auction details:", user?.user_id);
       try {
         setLoading(true);
         setError(null);
@@ -32,6 +33,7 @@ const AuctionDetails: React.FC = () => {
         // Fetch auction details
         const auctionData = await getAuctionById(id);
         setAuction(auctionData);
+        console.log("auction id : "+auctionData.auction_id);
           // Fetch vehicle details
         const vehicleData = await getVehicleById(auctionData.vehicle_id);
         setVehicle(vehicleData);
@@ -100,39 +102,23 @@ const AuctionDetails: React.FC = () => {
     });
   };
 
-  const handleBidSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // Modified handleBidSubmit to accept optional amount
+  const handleBidSubmit = async (e: React.FormEvent | null, customAmount?: number) => {
+    if (e) e.preventDefault();
+    const amountToBid = customAmount !== undefined ? customAmount : parseFloat(bidAmount);
     if (!auction || !user) return;
-    
-    const bidAmountNum = parseFloat(bidAmount);
-    
-    // Validation
-    if (isNaN(bidAmountNum)) {
-      setBidError('Please enter a valid bid amount.');
-      return;
-    }
-    
-    if (bidAmountNum <= auction.currentPrice) {
-      setBidError(`Bid amount must be higher than current price: $${auction.currentPrice}`);
-      return;
-    }
-    
     if (calculateTimeLeft(auction.endDate) === "Auction ended") {
       setBidError('This auction has ended.');
       return;
     }
-    
+      console.log(`Bid placed: ${amountToBid} for auction ${auction.auction_id}`);
     try {
-      setBidError(null);
       setLoading(true);
-      
-      await placeBid(id!, bidAmountNum);
-      
+      await placeBid(auction.auction_id, amountToBid, user.user_id);
       // Update auction with new bid price
       const updatedAuction = await getAuctionById(id!);
       setAuction(updatedAuction);
-        // Get new highest bid
+      // Get new highest bid
       try {
         const newHighestBid = await getHighestBid(id!);
         if (newHighestBid) {
@@ -140,12 +126,8 @@ const AuctionDetails: React.FC = () => {
         }
       } catch (bidErr) {
         console.log('Failed to get updated bid information');
-        // This shouldn't happen since we just placed a bid
       }
-      
       setBidSuccess('Your bid has been placed successfully!');
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setBidSuccess(null), 3000);
     } catch (err: any) {
       console.error('Error placing bid:', err);
@@ -153,6 +135,16 @@ const AuctionDetails: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper to increase bid and submit
+  const handleQuickBid = async (increment: number) => {
+    if (!auction || !user) return;
+    // Always base quick bid on the current auction price
+    const newBid = auction.currentPrice + increment;
+    setBidAmount(newBid.toString());
+    console.log("Quick bid amount: ", newBid);
+    handleBidSubmit(null, newBid);
   };
 
   if (loading && !auction) {
@@ -176,7 +168,7 @@ const AuctionDetails: React.FC = () => {
     );
   }
 
-  const isAuctionActive = auction.status === 'active' && calculateTimeLeft(auction.endDate) !== "Auction ended";
+  const isAuctionActive = auction.status === 'OPEN' && calculateTimeLeft(auction.endDate) !== "Auction ended";
 
   return (
     <div className="auction-details-container">
@@ -207,7 +199,7 @@ const AuctionDetails: React.FC = () => {
             <div className="auction-meta-details">
               <div className="meta-item">
                 <span className="meta-label">Current Bid:</span>
-                <span className="meta-value price">${auction.currentPrice.toLocaleString()}</span>
+                <span className="meta-value price">$  {auction.currentPrice.toLocaleString()}</span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Time Left:</span>
@@ -224,26 +216,32 @@ const AuctionDetails: React.FC = () => {
                 {bidError && <div className="bid-error">{bidError}</div>}
                 {bidSuccess && <div className="bid-success">{bidSuccess}</div>}
                 <form onSubmit={handleBidSubmit} className="bid-form">
-                  <div className="bid-input-group">
-                    <span className="currency-symbol">$</span>
-                    <input
-                      type="number"
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(e.target.value)}
-                      min={auction.currentPrice + 1}
-                      step="any"
-                      required
-                      className="bid-input"
-                      disabled={!isAuctionActive}
-                    />
+                  <div className="bid-buttons-group">
+                    <button
+                      type="button"
+                      className="bid-button"
+                      disabled={!isAuctionActive || loading}
+                      onClick={() => handleQuickBid(200000)}
+                    >
+                      Bid 200.000
+                    </button>
+                    <button
+                      type="button"
+                      className="bid-button"
+                      disabled={!isAuctionActive || loading}
+                      onClick={() => handleQuickBid(500000)}
+                    >
+                      Bid 500.000
+                    </button>
+                    <button
+                      type="button"
+                      className="bid-button"
+                      disabled={!isAuctionActive || loading}
+                      onClick={() => handleQuickBid(1000000)}
+                    >
+                      Bid 1.000.000
+                    </button>
                   </div>
-                  <button 
-                    type="submit" 
-                    className="bid-button"
-                    disabled={!isAuctionActive || loading}
-                  >
-                    {loading ? 'Processing...' : 'Place Bid'}
-                  </button>
                 </form>
                 <p className="bid-suggestion">
                   Suggested bid: ${(auction.currentPrice * 1.05).toFixed(2)}
@@ -251,7 +249,7 @@ const AuctionDetails: React.FC = () => {
               </div>
             )}
             
-            {!isAuctionActive && auction.status === 'active' && (
+            {!isAuctionActive && auction.status === 'OPEN' && (
               <div className="auction-ended">
                 <p>This auction has ended.</p>
               </div>
