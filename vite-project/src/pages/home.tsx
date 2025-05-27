@@ -92,7 +92,7 @@ const Home: React.FC = () => {
                 </div>
             ) : (
                 <div className="auctions-grid">
-                    {auctions.map((auction) => (
+                    {auctions.filter(auction => auction.status !== "pending" && new Date(auction.endDate).getTime() > Date.now()).map((auction) => (
                         <div 
                             className="auction-card" 
                             key={auction.auction_id}

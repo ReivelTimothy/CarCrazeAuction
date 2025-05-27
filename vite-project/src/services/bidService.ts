@@ -20,7 +20,9 @@ export const updateBidPrice = (auctionId: string, amount: number): Promise<Bid> 
   return fetchFromAPI(`/bid/${auctionId}/updateBidPrice`, 'PUT', { auction_id: auctionId, amount });
 };
 
-export const placeBid = (auctionId: string, amount: number): Promise<Bid> => {
+export const placeBid = (auctionId: string, amountt: number, userId:string): Promise<Bid> => {
   // This endpoint might need to be created in your backend
-  return fetchFromAPI(`/bid/${auctionId}/placeBid`, 'POST', { amount });
+  const amount = amountt 
+  console.log("Placing bid for auction:", auctionId, "with amount:", amount, "in service", "by user:", userId);
+  return fetchFromAPI(`/bid/${auctionId}/placeBid`, 'POST', { amount,  user_id:userId});
 };
