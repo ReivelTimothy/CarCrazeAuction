@@ -232,6 +232,19 @@
   animation: slideInDown 0.3s ease-out;
 }
 
+.success-message {
+  color: #2e7d32;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1), rgba(46, 125, 50, 0.05));
+  padding: 12px 16px;
+  border-radius: var(--border-radius-lg);
+  border-left: 4px solid #2e7d32;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  animation: slideInDown 0.3s ease-out;
+}
+
 .register-text {
   text-align: center;
   color: var(--gray-600);

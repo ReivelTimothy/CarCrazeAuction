@@ -20,13 +20,9 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
         if (!decoded) {
             res.status(401).json({ message: 'Invalid or expired token' });
         }
-        else {
-
-
-            // const { userId } = decoded as JwtPayloadWithUserId;
+        else {            // const { userId } = decoded as JwtPayloadWithUserId;
             const { userId, role } = decoded as JwtPayloadWithUserId;
 
-            console.log('Decoded token:', role);
             // Ensure req.body is defined before setting userId
             if (!req.body) {
                 req.body = {};  // Initialize req.body if it's undefined
@@ -50,9 +46,7 @@ export const authorizeAdmin = (req: Request, res: Response, next: NextFunction) 
         if (!decoded) {
             res.status(401).json({ message: 'Invalid or expired token' });
             return;
-        } else {
-            const { role } = decoded as JwtPayloadWithUserId;
-            console.log('Decoded token:', role);
+        } else {            const { role } = decoded as JwtPayloadWithUserId;
             // Check if the user is an admin
             if (role === 'admin') {
                 next(); // User is an admin, proceed to the next middleware or route handler

@@ -1,100 +1,113 @@
 import { Transaction } from "../../models/transaction";
+import { Auction } from "../../models/auction";
+import { sendSuccess, sendError, sendNotFound, sendValidationError } from '../utils/responseHelper';
 
-// 1. get all transactions
-export const getAllTransactions = async (req: any, res: any) => {
-    try {
-        const transactions = await Transaction.findAll();
-        res.status(200).json(transactions);
-    } catch (error) {
-        res.status(500).json({ message: "Error retrieving transactions", error });
-    }
-};
-
-// 2. get transaction by id
+// 1. get transaction by id
 export const getTransactionById = async (req: any, res: any) => {
     try {
         const transactionId = req.params.id;
+        
+        if (!transactionId) {
+            return sendValidationError(res, 'Transaction ID is required');
+        }
+        
         const transaction = await Transaction.findOne({ where: { transaction_id: transactionId } });
         if (!transaction) {
-            return res.status(404).json({ message: "Transaction not found" });
+            return sendNotFound(res, 'Transaction');
         }
-        res.status(200).json(transaction);
+        
+        sendSuccess(res, transaction, 'Transaction retrieved successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving transaction", error });
+        sendError(res, 'Error retrieving transaction', 500, error);
     }
 };
 
-// 3. get transaction by user_id
+// 2. get transaction by user_id
 export const getTransactionByUserId = async (req: any, res: any) => {
     try {
         const userId = req.params.user_id;
-        const transactions = await Transaction.findAll({ where: { user_id: userId } });
-        if (!transactions) {
-            return res.status(404).json({ message: "Transactions not found" });
+        
+        if (!userId) {
+            return sendValidationError(res, 'User ID is required');
         }
-        res.status(200).json(transactions);
+        
+        const transactions = await Transaction.findAll({ where: { user_id: userId } });
+        if (!transactions || transactions.length === 0) {
+            return sendNotFound(res, 'No transactions found for this user');
+        }
+        
+        sendSuccess(res, transactions, 'Transactions retrieved successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving transactions", error });
+        sendError(res, 'Error retrieving transactions', 500, error);
     }
 };
 
-// 4. create transaction
+// 3. create transaction
 export const createTransaction = async (req: any, res: any) => {
     try {
-        const { user_id, vehicle_id, amount} = req.body;
+        const { user_id, auction_id, amount, paymentMethod } = req.body;
+        
+        if (!user_id || !auction_id || !amount) {
+            return sendValidationError(res, 'All fields are required: user_id, auction_id, amount');
+        }
+        
         const newTransaction = await Transaction.create({
             user_id,
-            vehicle_id,
+            auction_id,
             amount,
-            status : "pending", // default status
+            transactionDate: new Date(),
+            paymentMethod: paymentMethod || 'Credit Card',
+            status: "pending", // default status
         });
-        res.status(201).json(newTransaction);
+        
+        sendSuccess(res, newTransaction, 'Transaction created successfully', 201);
     } catch (error) {
-        res.status(500).json({ message: "Error creating transaction", error });
+        sendError(res, 'Error creating transaction', 500, error);
     }
 };
 
-// 5. update transaction status
+// 4. update transaction status
 export const updateTransactionStatus = async (req: any, res: any) => {
     try {
         const transactionId = req.params.id;
         const { status } = req.body;
+        
+        if (!transactionId) {
+            return sendValidationError(res, 'Transaction ID is required');
+        }
+        
+        if (!status) {
+            return sendValidationError(res, 'Status is required');
+        }
+        
         const transaction = await Transaction.findOne({ where: { transaction_id: transactionId } });
         if (!transaction) {
-            return res.status(404).json({ message: "Transaction not found" });
+            return sendNotFound(res, 'Transaction');
         }
+        
         await transaction.update({ status });
-        res.status(200).json({message : "transaction status updated", transaction});
+        sendSuccess(res, transaction, 'Transaction status updated successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error updating transaction", error });
+        sendError(res, 'Error updating transaction', 500, error);
     }
 };
 
-// 6. delete transaction
+// 5. delete transaction
 export const deleteTransaction = async (req: any, res: any) => {
     try {
         const transactionId = req.params.id;
+        
+        if (!transactionId) {
+            return sendValidationError(res, 'Transaction ID is required');
+        }
+        
         const transaction = await Transaction.findOne({ where: { transaction_id: transactionId } });
         if (!transaction) {
-            return res.status(404).json({ message: "Transaction not found" });
+            return sendNotFound(res, 'Transaction');
         }
+        
         await transaction.destroy();
-        res.status(200).json({ message: "Transaction deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ message: "Error deleting transaction", error });
-    }
-};
-
-// 7. get transaction by vehicle_id
-export const getTransactionByVehicleId = async (req: any, res: any) => {
-    try {
-        const vehicleId = req.params.vehicle_id;
-        const transactions = await Transaction.findAll({ where: { vehicle_id: vehicleId } });
-        if (!transactions) {
-            return res.status(404).json({ message: "Transactions not found" });
-        }
-        res.status(200).json(transactions);
-    } catch (error) {
-        res.status(500).json({ message: "Error retrieving transactions", error });
+        sendSuccess(res, null, 'Transaction deleted successfully');
+    } catch (error) {        sendError(res, 'Error deleting transaction', 500, error);
     }
 };

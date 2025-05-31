@@ -1,6 +1,5 @@
 import { Table, Model, Column, DataType, HasOne } from 'sequelize-typescript';
 import { Auction } from './auction';
-import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class Vehicle extends Model {

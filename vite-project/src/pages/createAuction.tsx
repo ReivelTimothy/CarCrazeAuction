@@ -6,7 +6,6 @@ import '../styles/createAuction.css';
 
 const CreateAuction: React.FC = () => {
   const navigate = useNavigate();
-
   // Vehicle form state
   const [vehicleData, setVehicleData] = useState({
     type: '',
@@ -18,9 +17,7 @@ const CreateAuction: React.FC = () => {
     transmissionType: 'Automatic',
     fuelType: 'Gasoline',
     condition: 'Used',
-    documents: '',
-    name: '',
-    price: 0
+    documents: ''
   });
 
   // Auction form state
@@ -36,12 +33,11 @@ const CreateAuction: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1); // 1 for vehicle info, 2 for auction info
-
   const handleVehicleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setVehicleData(prev => ({
       ...prev,
-      [name]: name === 'year' || name === 'mileage' || name === 'price' ? Number(value) : value
+      [name]: name === 'year' || name === 'mileage' ? Number(value) : value
     }));
   };
 
@@ -62,24 +58,19 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     }));
   }
 };
-
   const handleNextStep = () => {
     // Validate vehicle data
     if (!vehicleData.brand || !vehicleData.model || !vehicleData.type) {
       setError('Please fill all required vehicle fields');
       return;
     }
-    console.log(auctionData);
 
     // Proceed to next step
     setStep(2);
-    setError(null);
-
-    // Pre-fill auction title
+    setError(null);    // Pre-fill auction title
     setAuctionData(prev => ({
       ...prev,
-      title: `${vehicleData.year} ${vehicleData.brand} ${vehicleData.model}`,
-      startingPrice: vehicleData.price
+      title: `${vehicleData.year} ${vehicleData.brand} ${vehicleData.model}`
     }));
   };
 
@@ -115,11 +106,8 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
       image: auctionData.image ,
       vehicle_id: newVehicle.vehicle_id,
     };
-    const newAuction = await createAuction(auctionPayload);
-
-    navigate(`/auction/${newAuction.auction_id}`);
+    const newAuction = await createAuction(auctionPayload);    navigate(`/auction/${newAuction.auction_id}`);
   } catch (err: any) {
-    console.error('Error creating auction:', err);
     setError(err.message || 'Failed to create auction. Please try again.');
   } finally {
     setLoading(false);
@@ -263,9 +251,7 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
                   <option value="Plug-in Hybrid">Plug-in Hybrid</option>
                 </select>
               </div>
-            </div>
-
-            <div className="form-row">
+            </div>            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="condition">Condition</label>
                 <select
@@ -279,18 +265,6 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
                   <option value="Certified Pre-owned">Certified Pre-owned</option>
                 </select>
               </div>
-
-              <div className="form-group">
-                <label htmlFor="price">Base Price ($)</label>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={vehicleData.price}
-                  onChange={handleVehicleChange}
-                  min="0"
-                />
-              </div>
             </div>
 
             <div className="form-group">
@@ -302,18 +276,6 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
                 onChange={handleVehicleChange}
                 placeholder="List all available documents (e.g., service history, ownership papers, etc.)"
               ></textarea>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="name">Vehicle Name</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={vehicleData.name}
-                onChange={handleVehicleChange}
-                placeholder="Custom name for this vehicle (optional)"
-              />
             </div>
 
             <div className="form-group">

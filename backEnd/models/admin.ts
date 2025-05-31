@@ -1,5 +1,4 @@
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
-import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class Admin extends Model {

@@ -1,7 +1,6 @@
 import {Table, Model, Column, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import { Bid } from './bid';
 import { Transaction } from './transaction';
-import { UUIDTypes } from 'uuid';
 
 @Table({ timestamps: false })
 export class User extends Model {

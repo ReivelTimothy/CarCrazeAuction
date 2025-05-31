@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { register } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 import "../styles/login.css"; // Reuse the login styles
@@ -12,6 +12,7 @@ const Register: React.FC = () => {
     const [phoneNum, setPhoneNum] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [registerError, setRegisterError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
@@ -56,14 +57,13 @@ const Register: React.FC = () => {
         if (!phoneRegex.test(phoneNum)) {
             setRegisterError("Please enter a valid phone number");
             return;
-        }
-
-        try {
+        }        try {
             setIsLoading(true);
+            setRegisterError("");
             await register({ username, email, password, phoneNum });
             // Show success message
-            alert("Registration successful! Please login with your credentials.");
-            navigate('/login');
+            setSuccessMessage("Registration successful! Please login with your credentials.");
+            setTimeout(() => navigate('/login'), 2000);
         } catch (error: any) {
             console.error("Registration error:", error);
             setRegisterError(error.message || "Registration failed. Please try again.");
@@ -73,10 +73,10 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-box register-box">
+        <div className="login-container">            <div className="login-box register-box">
                 <h1>Create Account</h1>
                 {registerError && <p className="error-message">{registerError}</p>}
+                {successMessage && <p className="success-message">{successMessage}</p>}
                 <form onSubmit={handleRegister}>
                     <input
                         type="text"

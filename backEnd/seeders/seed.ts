@@ -20,7 +20,7 @@ const sequelize = new Sequelize({
 async function seed() {
     try {
         await sequelize.authenticate();
-        console.log('Database connected!');
+        // Database connected successfully
 
         const user1 = await User.create({
             user_id: uuidv4(),
@@ -86,18 +86,16 @@ async function seed() {
             category: "SUV",
             image: 'avanza2020.jpg',
             vehicle_id: vehicle1.vehicle_id,
-        });
-
-        const auction2 = await Auction.create({
+        });        const auction2 = await Auction.create({
             auction_id: uuidv4(),
-            title: 'hinodutro 2022',
-            description: 'Truk pengangkut barang',
+            title: 'Lelang NMAX 2022',
+            description: 'Sepeda motor matik terbaru',
             startingPrice: 25_000_000,
             currentPrice: 27_000_000,
             startDate: new Date(),
             endDate: new Date(Date.now() + 172800000),
             status: "OPEN",
-            category: "Truck",
+            category: "Motorcycle",
             image: 'nmax2022.jpg',
             vehicle_id: vehicle2.vehicle_id,
         });

@@ -1,12 +1,13 @@
 import { Vehicle } from "../../models/vehicle";
+import { sendSuccess, sendError, sendNotFound, sendValidationError } from '../utils/responseHelper';
 
 // 1 get all vehicles
 export const getAllVehicles = async (req: any, res: any) => {
     try {
         const vehicles = await Vehicle.findAll();
-        res.status(200).json(vehicles);
+        sendSuccess(res, vehicles, 'Vehicles retrieved successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving vehicles", error });
+        sendError(res, 'Error retrieving vehicles', 500, error);
     }
 };
 
@@ -14,20 +15,32 @@ export const getAllVehicles = async (req: any, res: any) => {
 export const getVehicleById = async (req: any, res: any) => {
     try {
         const vehicleId = req.params.id;
+        
+        if (!vehicleId) {
+            return sendValidationError(res, 'Vehicle ID is required');
+        }
+        
         const vehicle = await Vehicle.findOne({ where: { vehicle_id: vehicleId } });
         if (!vehicle) {
-            return res.status(404).json({ message: "Vehicle not found" });
+            return sendNotFound(res, 'Vehicle');
         }
-        res.status(200).json(vehicle);
+        
+        sendSuccess(res, vehicle, 'Vehicle retrieved successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error retrieving vehicle", error });
+        sendError(res, 'Error retrieving vehicle', 500, error);
     }
 };
 
 // 3 create vehicle
 export const createVehicle = async (req: any, res: any) => {
     try {
-        const { type, brand, model, year, color, mileage, transmissionType, fuelType, condition, documents, name, price } = req.body;
+        const { type, brand, model, year, color, mileage, transmissionType, fuelType, condition, documents } = req.body;
+        
+        // Validate required fields
+        if (!type || !brand || !model || !year || !color || !mileage || !transmissionType || !fuelType || !condition || !documents) {
+            return sendValidationError(res, 'All required fields must be provided: type, brand, model, year, color, mileage, transmissionType, fuelType, condition, documents');
+        }
+        
         const newVehicle = await Vehicle.create({
             type,
             brand,
@@ -38,13 +51,12 @@ export const createVehicle = async (req: any, res: any) => {
             transmissionType,
             fuelType,
             condition,
-            documents,
-            name,
-            price,
+            documents
         });
-        res.status(201).json(newVehicle);
+        
+        sendSuccess(res, newVehicle, 'Vehicle created successfully', 201);
     } catch (error) {
-        res.status(500).json({ message: "Error creating vehicle", error });
+        sendError(res, 'Error creating vehicle', 500, error);
     }
 };
 
@@ -52,11 +64,17 @@ export const createVehicle = async (req: any, res: any) => {
 export const updateVehicle = async (req: any, res: any) => {
     try {
         const vehicleId = req.params.id;
-        const { type, brand, model, year, color, mileage, transmissionType, fuelType, condition, documents, name, price } = req.body;
+        const { type, brand, model, year, color, mileage, transmissionType, fuelType, condition, documents } = req.body;
+        
+        if (!vehicleId) {
+            return sendValidationError(res, 'Vehicle ID is required');
+        }
+        
         const vehicle = await Vehicle.findOne({ where: { vehicle_id: vehicleId } });
         if (!vehicle) {
-            return res.status(404).json({ message: "Vehicle not found" });
+            return sendNotFound(res, 'Vehicle');
         }
+        
         await vehicle.update({
             type,
             brand,
@@ -67,13 +85,12 @@ export const updateVehicle = async (req: any, res: any) => {
             transmissionType,
             fuelType,
             condition,
-            documents,
-            name,
-            price,
+            documents
         });
-        res.status(200).json(vehicle);
+        
+        sendSuccess(res, vehicle, 'Vehicle updated successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error updating vehicle", error });
+        sendError(res, 'Error updating vehicle', 500, error);
     }
 };
 
@@ -81,13 +98,19 @@ export const updateVehicle = async (req: any, res: any) => {
 export const deleteVehicle = async (req: any, res: any) => {
     try {
         const vehicleId = req.params.id;
+        
+        if (!vehicleId) {
+            return sendValidationError(res, 'Vehicle ID is required');
+        }
+        
         const vehicle = await Vehicle.findOne({ where: { vehicle_id: vehicleId } });
         if (!vehicle) {
-            return res.status(404).json({ message: "Vehicle not found" });
+            return sendNotFound(res, 'Vehicle');
         }
+        
         await vehicle.destroy();
-        res.status(200).json({ message: "Vehicle deleted successfully" });
+        sendSuccess(res, null, 'Vehicle deleted successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error deleting vehicle", error });
+        sendError(res, 'Error deleting vehicle', 500, error);
     }
 };

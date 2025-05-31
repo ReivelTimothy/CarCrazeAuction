@@ -32,17 +32,14 @@ const Home: React.FC = () => {
                             return {
                                 ...auction,
                                 vehicle: vehicleData
-                            };
-                        } catch (error) {
-                            console.error(`Error fetching vehicle ${auction.vehicle_id}:`, error);
+                            };                        } catch (error) {
+                            // Vehicle data fetch failed - continue without vehicle details
                             return auction;
                         }
                     })
                     
                 );
-                setAuctions(auctionsWithVehicles);
-            } catch (error) {
-                console.error("Error fetching auctions:", error);
+                setAuctions(auctionsWithVehicles);            } catch (error) {
                 setError("Failed to load auctions. Please try again later.");
             } finally {
                 setIsLoading(false);

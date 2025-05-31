@@ -1,56 +1,60 @@
-import {Bid} from '../../models/bid';
+import { Bid } from '../../models/bid';
+import { Auction } from '../../models/auction';
+import { sendSuccess, sendError, sendNotFound, sendValidationError } from '../utils/responseHelper';
 
 // 1. get highest bid from a vehicle
 export const getHighestBid = async (req: any, res: any) => {
     try {
         const auction_id = req.params.auction_id;
         if (!auction_id) {
-            return res.status(400).json({ message: "auction_id parameter is required" });
+            return sendValidationError(res, "auction_id parameter is required");
         }
 
         const highestBid = await Bid.findOne({
             where: { auction_id },
             order: [['amount', 'DESC']],
-        });
-
-        if (!highestBid) {
-            return res.status(404).json({ message: "No bids found for this auction" });
+        });        if (!highestBid) {
+            return sendNotFound(res, "No bids found for this auction");
         }
-        res.status(200).json(highestBid);
+        
+        sendSuccess(res, highestBid, 'Highest bid retrieved successfully');
     } catch (error) {
-        console.error("Error retrieving highest bid:", error);
-        res.status(500).json({ message: "Error retrieving highest bid", error });
+        sendError(res, 'Error retrieving highest bid', 500, error);
     }
 };
 
-// 2. update bid price with user_id and vehicle_id
+// 2. update bid price with user_id and auction_id
 export const updateBidPrice = async (req: any, res: any) => {
     try {
-        const {vehicle_id, amount} = req.body;
-        const userId = req.body.userId;
-        const bid = await Bid.findOne({ where: { userId, vehicle_id } });
-        if (!bid) {
-            return res.status(404).json({ message: "Bid not found" });
+        const auction_id = req.params.auction_id;
+        const { amount, user_id } = req.body;
+        
+        if (!user_id || !auction_id || !amount) {
+            return sendValidationError(res, "Missing required fields: user_id, auction_id, or amount");
         }
+        
+        const bid = await Bid.findOne({ where: { user_id, auction_id } });
+        if (!bid) {
+            return sendNotFound(res, "Bid");
+        }
+        
         bid.amount = amount;
         await bid.save();
-        res.status(200).json(bid);
+        
+        sendSuccess(res, bid, 'Bid updated successfully');
     } catch (error) {
-        res.status(500).json({ message: "Error updating bid", error });
+        sendError(res, 'Error updating bid', 500, error);
     }
 }
 
 // 3. Place a new bid
 export const placeBid = async (req: any, res: any) => {
-    console.log("Place Bid Request:", req.body);
     try {
-        
         const auction_id = req.params.auction_id;
-        const { amount } = req.body;
-        const {user_id} = req.body;
-        console.log("Placing bid for auction:", auction_id, "with amount:", amount, "by user:", user_id);
+        const { amount, user_id } = req.body;
+        
         if (!auction_id || !amount || !user_id) {
-            return res.status(400).json({ message: "Missing required fields: auction_id, amount, or user not authenticated" });
+            return sendValidationError(res, "Missing required fields: auction_id, amount, or user_id");
         }
         
         // Create a new bid
@@ -60,19 +64,15 @@ export const placeBid = async (req: any, res: any) => {
             amount,
             bidTime: new Date()
         });
-        
-        // Update auction's current price
-        const { Auction } = require('../../models/auction');
+          // Update auction's current price
         const auction = await Auction.findOne({ where: { auction_id } });
         if (auction && amount > auction.currentPrice) {
             auction.currentPrice = amount;
-            await auction.save();
-        }
+            await auction.save();        }
         
-        res.status(201).json(newBid);
+        sendSuccess(res, newBid, 'Bid placed successfully', 201);
     } catch (error) {
-        console.error("Error placing bid:", error);
-        res.status(500).json({ message: "Error placing bid", error });
+        sendError(res, 'Error placing bid', 500, error);
     }
 }
 

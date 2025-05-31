@@ -42,9 +42,7 @@ const Profile: React.FC = () => {
         // In a real application, you would filter auctions created by this user
         // Here we're just displaying all auctions as an example
         setUserAuctions(allAuctions.slice(0, 3)); // Just showing some auctions for example
-        
-      } catch (err) {
-        console.error('Error fetching profile data:', err);
+          } catch (err) {
         setError('Failed to load profile data');
       } finally {
         setLoading(false);

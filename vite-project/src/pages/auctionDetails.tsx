@@ -19,13 +19,10 @@ const AuctionDetails: React.FC = () => {
   const [bidError, setBidError] = useState<string | null>(null);
   const [bidSuccess, setBidSuccess] = useState<string | null>(null);
   const { user } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
+  const navigate = useNavigate();  useEffect(() => {
     const fetchAuctionDetails = async () => {
       if (!id) return;
-      console.log("Fetching auction details for ID:", id);
-      console.log("User in auction details:", user?.user_id);
+      
       try {
         setLoading(true);
         setError(null);
@@ -33,23 +30,22 @@ const AuctionDetails: React.FC = () => {
         // Fetch auction details
         const auctionData = await getAuctionById(id);
         setAuction(auctionData);
-        console.log("auction id : "+auctionData.auction_id);
-          // Fetch vehicle details
+        
+        // Fetch vehicle details
         const vehicleData = await getVehicleById(auctionData.vehicle_id);
         setVehicle(vehicleData);
-          // Fetch highest bid - in a separate try/catch to avoid preventing rest of data from loading
+        
+        // Fetch highest bid - in a separate try/catch to avoid preventing rest of data from loading
         try {
           const bidData = await getHighestBid(id);
           if (bidData) {
             setHighestBid(bidData);
           }
         } catch (bidErr) {
-          // It's normal to have no bids, so just log it with more context
-          console.log('No bids found for this auction - handled gracefully');
+          // It's normal to have no bids, so just continue silently
           // highestBid remains null which is fine
         }
       } catch (err: any) {
-        console.error('Error fetching auction details:', err);
         setError('Failed to load auction details. Please try again.');
       } finally {
         setLoading(false);
@@ -101,23 +97,25 @@ const AuctionDetails: React.FC = () => {
       minute: '2-digit',
     });
   };
-
   // Modified handleBidSubmit to accept optional amount
   const handleBidSubmit = async (e: React.FormEvent | null, customAmount?: number) => {
     if (e) e.preventDefault();
     const amountToBid = customAmount !== undefined ? customAmount : parseFloat(bidAmount);
     if (!auction || !user) return;
+    
     if (calculateTimeLeft(auction.endDate) === "Auction ended") {
       setBidError('This auction has ended.');
       return;
     }
-      console.log(`Bid placed: ${amountToBid} for auction ${auction.auction_id}`);
+    
     try {
       setLoading(true);
       await placeBid(auction.auction_id, amountToBid, user.user_id);
+      
       // Update auction with new bid price
       const updatedAuction = await getAuctionById(id!);
       setAuction(updatedAuction);
+      
       // Get new highest bid
       try {
         const newHighestBid = await getHighestBid(id!);
@@ -125,25 +123,24 @@ const AuctionDetails: React.FC = () => {
           setHighestBid(newHighestBid);
         }
       } catch (bidErr) {
-        console.log('Failed to get updated bid information');
+        // Failed to get updated bid information - not critical
       }
+      
       setBidSuccess('Your bid has been placed successfully!');
       setTimeout(() => setBidSuccess(null), 3000);
     } catch (err: any) {
-      console.error('Error placing bid:', err);
       setBidError(err.message || 'Failed to place bid. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
   // Helper to increase bid and submit
   const handleQuickBid = async (increment: number) => {
     if (!auction || !user) return;
+    
     // Always base quick bid on the current auction price
     const newBid = auction.currentPrice + increment;
     setBidAmount(newBid.toString());
-    console.log("Quick bid amount: ", newBid);
     handleBidSubmit(null, newBid);
   };
 

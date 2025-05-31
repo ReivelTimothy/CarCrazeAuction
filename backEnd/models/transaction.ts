@@ -1,8 +1,6 @@
 import { Table, Model, Column, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { User } from './user';
 import { Auction } from './auction';
-import { UUIDTypes } from 'uuid';
-import { StringifyOptions } from 'querystring';
 
 @Table({ timestamps: false })
 export class Transaction extends Model {

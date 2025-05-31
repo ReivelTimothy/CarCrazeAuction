@@ -1,8 +1,6 @@
 import { Table, Model, Column, DataType, ForeignKey, HasMany, BelongsTo, HasOne } from 'sequelize-typescript';
 import { Vehicle } from './vehicle';
 import { Bid } from './bid';
-import { UUIDTypes } from 'uuid';
-import { col } from 'sequelize';
 
 @Table({ timestamps: false })
 export class Auction extends Model {

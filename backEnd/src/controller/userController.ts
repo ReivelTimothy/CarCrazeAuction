@@ -2,7 +2,7 @@ import { User } from "../../models/user";
 import { Admin } from "../../models/admin";
 import { v4 as uuidv4 } from 'uuid';
 import { generateToken } from '../utils/jwt_helper';
-const SECRET_KEY = 'RAHASIA123';
+import { sendSuccess, sendError, sendNotFound, sendValidationError } from '../utils/responseHelper';
 
 
 // 1. Register User
@@ -10,10 +10,15 @@ export const registerUser = async (req: any, res: any) => {
     try {
         const { username, email, password, phoneNum } = req.body;
 
+        // Validate required fields
+        if (!username || !email || !password || !phoneNum) {
+            return sendValidationError(res, 'All fields are required: username, email, password, phoneNum');
+        }
+
         // Check if the user already exists
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+            return sendValidationError(res, 'User already exists with this email');
         }
 
         // Create a new user
@@ -25,10 +30,9 @@ export const registerUser = async (req: any, res: any) => {
             phoneNum,
         });
 
-        return res.status(201).json({ message: 'User registered successfully' , user: newUser });
+        return sendSuccess(res, newUser, 'User registered successfully', 201);
     } catch (error) {
-        console.error('Error registering user:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error registering user', 500, error);
     }
 }
 
@@ -36,26 +40,20 @@ export const registerUser = async (req: any, res: any) => {
 export const logoutUser = async (req: any, res: any) => {
     try {
         // Invalidate the token (this can be done by removing it from the client side)
-        return res.status(200).json({ message: 'Logout successful' });
+        return sendSuccess(res, null, 'Logout successful');
     } catch (error) {
-        console.error('Error logging out user:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error logging out user', 500, error);
     }
 }
 
 // 3. Login User
-export const loginUser = async (req: any, res: any) => {
-    try {
-        console.log("Login request body:", req.body);
+export const loginUser = async (req: any, res: any) => {    try {
         const { email, password } = req.body;
         
         if (!email || !password) {
-            return res.status(400).json({ message: 'Email and password are required' });
-        }
-
-        // Make sure email is a string
+            return sendValidationError(res, 'Email and password are required');
+        }        // Make sure email is a string
         const emailStr = typeof email === 'string' ? email : String(email);
-        console.log("Email being used for query:", emailStr);
         
         // First try to find a user with the email
         try {
@@ -68,12 +66,12 @@ export const loginUser = async (req: any, res: any) => {
             if (user) {
                 // Check if the user password is correct
                 if (user.password !== password) {
-                    return res.status(401).json({ message: 'Invalid email or password' });
+                    return sendValidationError(res, 'Invalid email or password');
                 }
                 
                 // Generate a token for the user
                 const token = generateToken(user.user_id, "user");
-                return res.status(200).json({ message: 'Login successful', token });
+                return sendSuccess(res, { token }, 'Login successful');
             }
             
             // If no user was found, check for an admin
@@ -86,59 +84,64 @@ export const loginUser = async (req: any, res: any) => {
             if (admin) {
                 // Check if the admin password is correct
                 if (admin.password !== password) {
-                    return res.status(401).json({ message: 'Invalid email or password' });
+                    return sendValidationError(res, 'Invalid email or password');
                 }
                 
                 // Generate a token for the admin
                 const token = generateToken(admin.admin_id, "admin");
-                return res.status(200).json({ message: 'Login successful', token });
+                return sendSuccess(res, { token }, 'Login successful');
             }
             
             // If we get here, neither user nor admin was found
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return sendValidationError(res, 'Invalid email or password');
         } catch (queryError) {
-            console.error('Error querying database:', queryError);
-            return res.status(500).json({ message: 'Database query error' });
+            sendError(res, 'Database query error', 500, queryError);
         }
     } catch (error) {
-        console.error('Error logging in user:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error logging in user', 500, error);
     }
 }
 
 
 
 // 4. Get User Profile
-export const getUserProfile = async (req: any, res: any) => {
-    try {
+export const getUserProfile = async (req: any, res: any) => {    try {
         const userId = req.body.userId; // Assuming you have middleware to extract userId from token
-        console.log("Get Profile Request:", { userId });
+        
+        if (!userId) {
+            return sendValidationError(res, 'User ID is required');
+        }
+        
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return sendNotFound(res, 'User');
         }
 
-        return res.status(200).json(user);
+        return sendSuccess(res, user, 'User profile retrieved successfully');
     } catch (error) {
-        console.error('Error fetching user profile:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error fetching user profile', 500, error);
     }
 }
 
 
 // 5. Update User Profile
-export const updateUserProfile = async (req: any, res: any) => {
-    try {
+export const updateUserProfile = async (req: any, res: any) => {    try {
         const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
         const { username, email, phoneNum } = req.body;
-        
-        console.log("Update Profile Request:", { userId, username, email, phoneNum });
+
+        if (!userId) {
+            return sendValidationError(res, 'User ID is required');
+        }
+
+        if (!username || !email || !phoneNum) {
+            return sendValidationError(res, 'All fields are required: username, email, phoneNum');
+        }
 
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return sendNotFound(res, 'User');
         }
 
         // Update user profile
@@ -147,33 +150,32 @@ export const updateUserProfile = async (req: any, res: any) => {
         user.phoneNum = phoneNum;
         await user.save();
 
-        return res.status(200).json({ message: 'User profile updated successfully' });
+        return sendSuccess(res, user, 'User profile updated successfully');
     } catch (error) {
-        console.error('Error updating user profile:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error updating user profile', 500, error);
     }
 }
 
 // 6. Delete User Profile
-export const deleteUserProfile = async (req: any, res: any) => {
-    try {
+export const deleteUserProfile = async (req: any, res: any) => {    try {
         const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
-        
-        console.log("Delete Profile Request:", { userId });
+
+        if (!userId) {
+            return sendValidationError(res, 'User ID is required');
+        }
 
         // Find the user by ID
         const user = await User.findOne({ where: { user_id: userId } });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return sendNotFound(res, 'User');
         }
 
         // Delete the user
         await user.destroy();
 
-        return res.status(200).json({ message: 'User profile deleted successfully' });
+        return sendSuccess(res, null, 'User profile deleted successfully');
     } catch (error) {
-        console.error('Error deleting user profile:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error deleting user profile', 500, error);
     }
 }
 
@@ -181,9 +183,8 @@ export const deleteUserProfile = async (req: any, res: any) => {
 export const getAllUsers = async (req: any, res: any) => {
     try {
         const users = await User.findAll();
-        return res.status(200).json(users);
+        return sendSuccess(res, users, 'Users retrieved successfully');
     } catch (error) {
-        console.error('Error fetching all users:', error);
-        return res.status(500).json({ message: 'Internal server error' });
+        sendError(res, 'Error fetching all users', 500, error);
     }
 }

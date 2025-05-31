@@ -14,7 +14,7 @@ export const createVehicle = (vehicleData: Omit<Vehicle, 'vehicle_id'>): Promise
 };
 
 export const updateVehicle = (id: string, vehicleData: Partial<Vehicle>): Promise<Vehicle> => {
-  return fetchFromAPI(`/vehicle/${id}/updateVechicle`, 'PUT', vehicleData);
+  return fetchFromAPI(`/vehicle/${id}/updateVehicle`, 'PUT', vehicleData);
 };
 
 export const deleteVehicle = (id: string): Promise<{ message: string }> => {

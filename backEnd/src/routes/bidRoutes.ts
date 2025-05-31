@@ -1,13 +1,13 @@
 import express from "express";
 import { getHighestBid, updateBidPrice, placeBid } from "../controller/bidController";
+import { authenticateJWT } from '../middleware/auth';
+
 const bidRoutes = express.Router();
 
-// 1. Get Highest Bid
+// Bid routes with appropriate authentication
 bidRoutes.get("/:auction_id/getHighestBid", getHighestBid);
-// 2. Update Bid Price
-bidRoutes.put("/:auction_id/updateBidPrice", updateBidPrice);
-// 3. Place Bid
-bidRoutes.post("/:auction_id/placeBid", placeBid);
+bidRoutes.put("/:auction_id/updateBidPrice", authenticateJWT, updateBidPrice);
+bidRoutes.post("/:auction_id/placeBid", authenticateJWT, placeBid);
 
 
 export default bidRoutes;

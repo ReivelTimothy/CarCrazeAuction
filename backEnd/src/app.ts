@@ -27,7 +27,9 @@ const sequelize = new Sequelize({
     
 
 sequelize.authenticate()
-    .then(() => console.log('Database connected successfully!'))
+    .then(() => {
+        // Database connected successfully
+    })
     .catch(err => {
         console.error('Database connection failed:', err);
         process.exit(1);
@@ -45,7 +47,7 @@ app.use('/uploads', express.static('uploads')); // Serve static files from the u
 
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack, "muhahaha");
+    console.error('Server Error:', err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
 });
 

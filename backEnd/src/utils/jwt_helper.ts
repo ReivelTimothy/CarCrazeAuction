@@ -5,7 +5,6 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key'; // Make sure to 
 
 // Generate a JWT token with role
 export const generateToken = (userId: UUIDTypes, role: 'user' | 'admin'): string => {
-  console.log('Generating token for userId:', userId, 'with role:', role);
   return jwt.sign({ userId, role }, SECRET_KEY, { expiresIn: '1h' });
 };
 
