@@ -229,8 +229,13 @@ const Profile: React.FC = () => {
               </div>
             </div>
           )}        </div>
-        
-        {/* Role-based content rendering */}
+          {/* Role-based content rendering */}
+        {!user?.role && (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading profile data...</p>
+          </div>
+        )}
         {user?.role === 'admin' ? (
           // Admin Dashboard
           <div className="admin-dashboard">
@@ -255,8 +260,7 @@ const Profile: React.FC = () => {
                     <p className="stat-number">{adminStats.totalBids}</p>
                   </div>
                 </div>
-                
-                <div className="admin-sections">
+                  <div className="admin-sections">
                   <div className="recent-auctions">
                     <h3>Recent Auctions</h3>
                     {adminStats.recentAuctions.length > 0 ? (
@@ -265,7 +269,7 @@ const Profile: React.FC = () => {
                           <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
                             <h4>{auction.title}</h4>
                             <div className="auction-item-details">
-                              <span className="auction-price">${auction.currentPrice}</span>
+                              <span className="auction-price">${auction.currentPrice.toLocaleString()}</span>
                               <span className={`auction-status status-${auction.status}`}>
                                 {auction.status}
                               </span>
@@ -286,7 +290,7 @@ const Profile: React.FC = () => {
                           <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
                             <h4>{auction.title}</h4>
                             <div className="auction-item-details">
-                              <span className="auction-price">${auction.currentPrice}</span>
+                              <span className="auction-price">${auction.currentPrice.toLocaleString()}</span>
                               <span className="bid-count">{auction.bidCount} bids</span>
                             </div>
                           </div>
@@ -296,6 +300,41 @@ const Profile: React.FC = () => {
                       <p>No active auctions with bids found.</p>
                     )}
                   </div>
+                </div>
+                
+                {/* Recent Bid Activity Section */}
+                <div className="recent-bid-activity">
+                  <h3>Recent Bid Activity</h3>
+                  {adminStats.recentBids && adminStats.recentBids.length > 0 ? (
+                    <div className="bid-activity-list">
+                      {adminStats.recentBids.map(bid => (
+                        <div key={bid.bid_id} className="bid-activity-item">
+                          <div className="bid-activity-details">
+                            <div className="bid-user">
+                              <span className="user-icon"></span>
+                              <span className="user-id">{bid.user_id}</span>
+                            </div>
+                            <div className="bid-info">
+                              <span className="bid-amount">${bid.amount.toLocaleString()}</span>
+                              <span className="bid-auction">on {bid.auction_title}</span>
+                              <span className="bid-time">{new Date(bid.bidTime).toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <button 
+                            className="view-auction-btn" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/auction/${bid.auction_id}`);
+                            }}
+                          >
+                            View
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p>No recent bid activity found.</p>
+                  )}
                 </div>
                 
                 <div className="admin-actions">

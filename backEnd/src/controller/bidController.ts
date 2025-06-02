@@ -52,13 +52,20 @@ export const updateBidPrice = async (req: any, res: any) => {
 }
 
 // 3. Place a new bid
-export const placeBid = async (req: any, res: any) => {
+export const placeBid = async (req: AuthRequest, res: any) => {
     console.log("Place Bid Request:", req.body);
     try {
         
         const auction_id = req.params.auction_id;
         const { amount } = req.body;
         const {user_id} = req.body;
+        const role = req.user?.role;
+        
+        // Prevent admins from placing bids
+        if (role === 'admin') {
+            return res.status(403).json({ message: "Admins are not allowed to place bids" });
+        }
+        
         console.log("Placing bid for auction:", auction_id, "with amount:", amount, "by user:", user_id);
         if (!auction_id || !amount || !user_id) {
             return res.status(400).json({ message: "Missing required fields: auction_id, amount, or user not authenticated" });

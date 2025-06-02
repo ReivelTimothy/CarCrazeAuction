@@ -645,6 +645,21 @@
   content: '✅';
 }
 
+/* Admin-specific styles */
+.admin-bid-message {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 4px;
+}
+
+.admin-bid-message p {
+  color: #495057;
+  font-size: 1rem;
+  margin: 0;
+}
+
 /* Animations */
 @keyframes slideInFromTop {
   from {

@@ -86,4 +86,12 @@ export interface AdminStatistics {
     endDate: string;
     bidCount: number;
   }>;
+  recentBids?: Array<{
+    bid_id: string;
+    user_id: string;
+    auction_id: string;
+    auction_title: string;
+    amount: number;
+    bidTime: string | Date;
+  }>;
 }

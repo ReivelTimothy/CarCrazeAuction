@@ -103,12 +103,18 @@ const AuctionDetails: React.FC = () => {
       minute: '2-digit',
     });
   };
-
   // Modified handleBidSubmit to accept optional amount
   const handleBidSubmit = async (e: React.FormEvent | null, customAmount?: number) => {
     if (e) e.preventDefault();
     const amountToBid = customAmount !== undefined ? customAmount : parseFloat(bidAmount);
     if (!auction || !user) return;
+    
+    // Prevent admins from placing bids
+    if (user.role === 'admin') {
+      setBidError('Admins are not allowed to place bids');
+      return;
+    }
+    
     if (calculateTimeLeft(auction.endDate) === "Auction ended") {
       setBidError('This auction has ended.');
       return;
@@ -165,10 +171,16 @@ const AuctionDetails: React.FC = () => {
       setStatusUpdateLoading(false);
     }
   };
-
   // Helper to increase bid and submit
   const handleQuickBid = async (increment: number) => {
     if (!auction || !user) return;
+    
+    // Prevent admins from placing quick bids
+    if (user.role === 'admin') {
+      setBidError('Admins are not allowed to place bids');
+      return;
+    }
+    
     // Always base quick bid on the current auction price
     const newBid = auction.currentPrice + increment;
     setBidAmount(newBid.toString());
@@ -274,9 +286,9 @@ const AuctionDetails: React.FC = () => {
               <div className="meta-item">
                 <span className="meta-label">Ending:</span>
                 <span className="meta-value">{formatDate(auction.endDate)}</span>
-              </div>
-            </div>
-            {isAuctionActive && user && (
+              </div>            </div>
+            {/* Only show bid section for non-admin users */}
+            {isAuctionActive && user && user.role !== 'admin' && (
               <div className="bid-section">
                 {bidError && <div className="bid-error">{bidError}</div>}
                 {bidSuccess && <div className="bid-success">{bidSuccess}</div>}
@@ -313,13 +325,19 @@ const AuctionDetails: React.FC = () => {
                 </p>
               </div>
             )}
-            
-            {isAuctionActive && !user && (
+              {isAuctionActive && !user && (
               <div className="login-to-bid">
                 <p>Please login to place bids on this auction.</p>
                 <button className="btn btn-primary" onClick={() => navigate('/login')}>
                   Login to Bid
                 </button>
+              </div>
+            )}
+            
+            {/* Show message for admin users explaining why they can't bid */}
+            {isAuctionActive && user && user.role === 'admin' && (
+              <div className="admin-bid-message">
+                <p>As an admin, you cannot place bids on auctions.</p>
               </div>
             )}
             

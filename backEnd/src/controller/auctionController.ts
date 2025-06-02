@@ -117,9 +117,7 @@ export const getAdminStatistics = async (req: any, res: any) => {
                 }
             ],
             order: [['startDate', 'DESC']]
-        });
-
-        // Format active auctions with bid counts
+        });        // Format active auctions with bid counts
         const activeAuctionsWithBids = activeAuctionsData.map(auction => ({
             auction_id: auction.auction_id,
             title: auction.title,
@@ -127,6 +125,31 @@ export const getAdminStatistics = async (req: any, res: any) => {
             endDate: auction.endDate,
             bidCount: auction.bids ? auction.bids.length : 0
         }));
+          // Get recent bids with auction title
+        const recentBids = await Bid.findAll({
+            attributes: ['bid_id', 'user_id', 'auction_id', 'amount', 'bidTime'],
+            include: [{
+                model: Auction,
+                attributes: ['title'],
+                required: true
+            }],
+            order: [['bidTime', 'DESC']],
+            limit: 10
+        });
+        
+        // Format recent bids
+        const formattedRecentBids = recentBids.map(bid => {
+            // Handle potential serialization issues by accessing raw values
+            const plainBid = bid.get({ plain: true });
+            return {
+                bid_id: plainBid.bid_id,
+                user_id: plainBid.user_id,
+                auction_id: plainBid.auction_id,
+                auction_title: plainBid.auction ? plainBid.auction.title : 'Unknown Auction',
+                amount: plainBid.amount,
+                bidTime: plainBid.bidTime
+            };
+        });
 
         res.status(200).json({
             totalAuctions,
@@ -134,7 +157,8 @@ export const getAdminStatistics = async (req: any, res: any) => {
             totalRevenue: totalRevenue || 0,
             totalBids,
             recentAuctions,
-            activeAuctionsWithBids
+            activeAuctionsWithBids,
+            recentBids: formattedRecentBids
         });
     } catch (error) {
         console.error("Error getting admin statistics:", error);
