@@ -1,5 +1,5 @@
 import { fetchFromAPI } from './api';
-import type { Auction } from '../types/types';
+import type { Auction, AdminStatistics } from '../types/types';
 
 export const getAllAuctions = (): Promise<Auction[]> => {
   return fetchFromAPI('/auction/getAllAuctions', 'GET');
@@ -39,4 +39,18 @@ export const createAuction = (auctionData: Partial<Auction>): Promise<Auction> =
 
 export const updateAuctionStatus = (id: string, status: 'active' | 'closed' | 'pending'): Promise<Auction> => {
   return fetchFromAPI(`/admin/${id}/updateAuctionStatus`, 'PUT', { status });
+};
+
+// New functions for user participation data
+export const getUserParticipatedAuctions = (): Promise<Auction[]> => {
+  return fetchFromAPI('/bid/user/participated', 'GET');
+};
+
+export const getUserWonAuctions = (): Promise<Auction[]> => {
+  return fetchFromAPI('/bid/user/won', 'GET');
+};
+
+// Admin statistics function
+export const getAdminStatistics = (): Promise<AdminStatistics> => {
+  return fetchFromAPI('/admin/statistics', 'GET');
 };

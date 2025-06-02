@@ -71,3 +71,19 @@ export interface APIResponse<T> {
   data?: T;
   error?: string;
 }
+
+// Admin statistics type
+export interface AdminStatistics {
+  totalAuctions: number;
+  activeAuctions: number;
+  totalRevenue: number;
+  totalBids: number;
+  recentAuctions: Auction[];
+  activeAuctionsWithBids: Array<{
+    auction_id: string;
+    title: string;
+    currentPrice: number;
+    endDate: string;
+    bidCount: number;
+  }>;
+}

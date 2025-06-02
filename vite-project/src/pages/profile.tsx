@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '../services/authService';
-import { getAllAuctions } from '../services/auctionService';
-import type { Auction } from '../types/types';
+import { getUserParticipatedAuctions, getUserWonAuctions, getAdminStatistics } from '../services/auctionService';
+import type { Auction, AdminStatistics } from '../types/types';
 import '../styles/profile.css';
 
 const Profile: React.FC = () => {
@@ -16,13 +16,13 @@ const Profile: React.FC = () => {
     email: '',
     phoneNum: ''
   });
-  
-  const [userAuctions, setUserAuctions] = useState<Auction[]>([]);
+  const [participatedAuctions, setParticipatedAuctions] = useState<Auction[]>([]);
+  const [wonAuctions, setWonAuctions] = useState<Auction[]>([]);
+  const [adminStats, setAdminStats] = useState<AdminStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
-  
-  useEffect(() => {
+    useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
@@ -37,11 +37,20 @@ const Profile: React.FC = () => {
           phoneNum: userData.phoneNum
         });
         
-        // Fetch user auctions (Note: This might need backend support)
-        const allAuctions = await getAllAuctions();
-        // In a real application, you would filter auctions created by this user
-        // Here we're just displaying all auctions as an example
-        setUserAuctions(allAuctions.slice(0, 3)); // Just showing some auctions for example
+        // Fetch role-specific data
+        if (user?.role === 'admin') {
+          // Fetch admin statistics
+          const stats = await getAdminStatistics();
+          setAdminStats(stats);
+        } else {
+          // Fetch user auction participation data
+          const [participated, won] = await Promise.all([
+            getUserParticipatedAuctions(),
+            getUserWonAuctions()
+          ]);
+          setParticipatedAuctions(participated);
+          setWonAuctions(won);
+        }
         
       } catch (err) {
         console.error('Error fetching profile data:', err);
@@ -52,7 +61,7 @@ const Profile: React.FC = () => {
     };
     
     fetchUserData();
-  }, []);
+  }, [user?.role]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -219,38 +228,147 @@ const Profile: React.FC = () => {
                 </button>
               </div>
             </div>
-          )}
-        </div>
+          )}        </div>
         
-        <div className="user-auctions">
-          <h2>My Auctions</h2>
-          {userAuctions.length > 0 ? (
-            <div className="auctions-list">
-              {userAuctions.map(auction => (
-                <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
-                  <h3>{auction.title}</h3>
-                  <div className="auction-item-details">
-                    <span className="auction-price">${auction.currentPrice}</span>
-                    <span className={`auction-status status-${auction.status}`}>
-                      {auction.status}
-                    </span>
+        {/* Role-based content rendering */}
+        {user?.role === 'admin' ? (
+          // Admin Dashboard
+          <div className="admin-dashboard">
+            <h2>Admin Dashboard</h2>
+            {adminStats ? (
+              <div className="admin-stats">
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <h3>Total Auctions</h3>
+                    <p className="stat-number">{adminStats.totalAuctions}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>Active Auctions</h3>
+                    <p className="stat-number">{adminStats.activeAuctions}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>Total Revenue</h3>
+                    <p className="stat-number">${adminStats.totalRevenue}</p>
+                  </div>
+                  <div className="stat-card">
+                    <h3>Total Bids</h3>
+                    <p className="stat-number">{adminStats.totalBids}</p>
                   </div>
                 </div>
-              ))}
-              <div className="auction-item create-new" onClick={() => navigate('/create-auction')}>
-                <div className="create-icon">+</div>
-                <p>Create New Auction</p>
+                
+                <div className="admin-sections">
+                  <div className="recent-auctions">
+                    <h3>Recent Auctions</h3>
+                    {adminStats.recentAuctions.length > 0 ? (
+                      <div className="auctions-list">
+                        {adminStats.recentAuctions.map(auction => (
+                          <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                            <h4>{auction.title}</h4>
+                            <div className="auction-item-details">
+                              <span className="auction-price">${auction.currentPrice}</span>
+                              <span className={`auction-status status-${auction.status}`}>
+                                {auction.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No recent auctions found.</p>
+                    )}
+                  </div>
+                  
+                  <div className="active-auctions">
+                    <h3>Active Auctions with Bids</h3>
+                    {adminStats.activeAuctionsWithBids.length > 0 ? (
+                      <div className="auctions-list">
+                        {adminStats.activeAuctionsWithBids.map(auction => (
+                          <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                            <h4>{auction.title}</h4>
+                            <div className="auction-item-details">
+                              <span className="auction-price">${auction.currentPrice}</span>
+                              <span className="bid-count">{auction.bidCount} bids</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No active auctions with bids found.</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="admin-actions">
+                  <button onClick={() => navigate('/create-auction')} className="btn btn-primary">
+                    Create New Auction
+                  </button>
+                  <button onClick={() => navigate('/admin/manage')} className="btn btn-secondary">
+                    Manage Auctions
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="loading-stats">
+                <p>Loading admin statistics...</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          // User Dashboard
+          <div className="user-dashboard">
+            <div className="user-auction-sections">
+              <div className="participated-auctions">
+                <h2>Auctions I Participated In</h2>
+                {participatedAuctions.length > 0 ? (
+                  <div className="auctions-list">
+                    {participatedAuctions.map(auction => (
+                      <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                        <h3>{auction.title}</h3>
+                        <div className="auction-item-details">
+                          <span className="auction-price">${auction.currentPrice}</span>
+                          <span className={`auction-status status-${auction.status}`}>
+                            {auction.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-auctions">
+                    <p>You haven't participated in any auctions yet.</p>
+                    <button onClick={() => navigate('/auctions')} className="btn btn-primary">
+                      Browse Auctions
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="won-auctions">
+                <h2>Auctions I Won</h2>
+                {wonAuctions.length > 0 ? (
+                  <div className="auctions-list">
+                    {wonAuctions.map(auction => (
+                      <div key={auction.auction_id} className="auction-item won-auction" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                        <h3>{auction.title}</h3>
+                        <div className="auction-item-details">
+                          <span className="auction-price">${auction.currentPrice}</span>
+                          <span className="won-badge">WON</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="no-auctions">
+                    <p>You haven't won any auctions yet.</p>
+                    <button onClick={() => navigate('/auctions')} className="btn btn-primary">
+                      Browse Auctions
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-          ) : (
-            <div className="no-auctions">
-              <p>You haven't created any auctions yet.</p>
-              <button onClick={() => navigate('/create-auction')} className="btn btn-primary">
-                Create Your First Auction
-              </button>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

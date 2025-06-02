@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAuction, updateAuctionStatus } from '../controller/auctionController';
+import { createAuction, updateAuctionStatus, getAdminStatistics } from '../controller/auctionController';
 import { authenticateJWT, authorizeAdmin } from '../middleware/auth';
 import multer from 'multer';
 
@@ -18,5 +18,7 @@ const upload = multer({ storage });
 adminRoutes.post('/createAuction', upload.single('image'), authenticateJWT, authorizeAdmin, createAuction);
 // 2. Update Auction status (Admin only)
 adminRoutes.put('/:auction_id/updateAuctionStatus', authenticateJWT, authorizeAdmin, updateAuctionStatus);
+// 3. Get Admin Statistics (Admin only)
+adminRoutes.get('/statistics', authenticateJWT, authorizeAdmin, getAdminStatistics);
 
 export default adminRoutes;

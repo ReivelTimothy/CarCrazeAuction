@@ -8,7 +8,14 @@ interface JwtPayloadWithUserId {
     role: 'user' | 'admin';
 }
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+interface AuthRequest extends Request {
+    user?: {
+        userId: string;
+        role: 'user' | 'admin';
+    };
+}
+
+export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];  // Token from 'Authorization: Bearer token'
 
     if (!token) {
@@ -21,19 +28,22 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
             res.status(401).json({ message: 'Invalid or expired token' });
         }
         else {
-
-
-            // const { userId } = decoded as JwtPayloadWithUserId;
             const { userId, role } = decoded as JwtPayloadWithUserId;
 
             console.log('Decoded token:', role);
-            // Ensure req.body is defined before setting userId
-            if (!req.body) {
-                req.body = {};  // Initialize req.body if it's undefined
-            }
+            
+            // Store user information in req.user
+            req.user = {
+                userId: String(userId),
+                role: role
+            };
 
-            req.body.userId = userId;  // Store the userId in req.body
-            req.body.role = role;      // Store the role in req.body
+            // For backward compatibility, also store in req.body for existing endpoints
+            if (!req.body) {
+                req.body = {};
+            }
+            req.body.userId = userId;
+            req.body.role = role;
 
             next(); // Continue to the next middleware or route handler
         }
