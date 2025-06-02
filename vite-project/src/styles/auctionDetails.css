@@ -248,6 +248,37 @@
   border-top: 2px solid var(--gray);
 }
 
+.login-to-bid {
+  margin-top: auto;
+  padding: 2rem;
+  border-top: 2px solid var(--gray);
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: var(--border-radius-md);
+}
+
+.login-to-bid p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--text-light);
+}
+
+.login-to-bid button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.login-to-bid button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
 .bid-error {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   color: var(--error-color);

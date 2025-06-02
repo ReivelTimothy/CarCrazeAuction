@@ -209,9 +209,8 @@ const AuctionDetails: React.FC = () => {
                 <span className="meta-label">Ending:</span>
                 <span className="meta-value">{formatDate(auction.endDate)}</span>
               </div>
-            </div>
-            
-            {isAuctionActive && (
+            </div>            
+            {isAuctionActive && user && (
               <div className="bid-section">
                 {bidError && <div className="bid-error">{bidError}</div>}
                 {bidSuccess && <div className="bid-success">{bidSuccess}</div>}
@@ -246,6 +245,15 @@ const AuctionDetails: React.FC = () => {
                 <p className="bid-suggestion">
                   Suggested bid: ${(auction.currentPrice * 1.05).toFixed(2)}
                 </p>
+              </div>
+            )}
+            
+            {isAuctionActive && !user && (
+              <div className="login-to-bid">
+                <p>Please login to place bids on this auction.</p>
+                <button className="btn btn-primary" onClick={() => navigate('/login')}>
+                  Login to Bid
+                </button>
               </div>
             )}
             
