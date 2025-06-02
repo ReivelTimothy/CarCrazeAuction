@@ -2,26 +2,27 @@ import { User } from "../../models/user";
 import { Admin } from "../../models/admin";
 import { v4 as uuidv4 } from 'uuid';
 import { generateToken } from '../utils/jwt_helper';
-const SECRET_KEY = 'RAHASIA123';
+import { hashPassword, comparePassword } from '../utils/password_helper';
 
 
 // 1. Register User
 export const registerUser = async (req: any, res: any) => {
     try {
-        const { username, email, password, phoneNum } = req.body;
-
-        // Check if the user already exists
+        const { username, email, password, phoneNum } = req.body;        // Check if the user already exists
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
+
+        // Hash the password before storing
+        const hashedPassword = await hashPassword(password);
 
         // Create a new user
         const newUser = await User.create({
             user_id: uuidv4(),
             username,
             email,
-            password,
+            password: hashedPassword,
             phoneNum,
         });
 
@@ -63,11 +64,10 @@ export const loginUser = async (req: any, res: any) => {
                 where: {
                     email: emailStr
                 }
-            });
-
-            if (user) {
-                // Check if the user password is correct
-                if (user.password !== password) {
+            });            if (user) {
+                // Check if the user password is correct using bcrypt
+                const isPasswordValid = await comparePassword(password, user.password);
+                if (!isPasswordValid) {
                     return res.status(401).json({ message: 'Invalid email or password' });
                 }
                 
@@ -82,10 +82,10 @@ export const loginUser = async (req: any, res: any) => {
                     email: emailStr
                 }
             });
-            
-            if (admin) {
-                // Check if the admin password is correct
-                if (admin.password !== password) {
+              if (admin) {
+                // Check if the admin password is correct using bcrypt
+                const isPasswordValid = await comparePassword(password, admin.password);
+                if (!isPasswordValid) {
                     return res.status(401).json({ message: 'Invalid email or password' });
                 }
                 
@@ -131,7 +131,7 @@ export const getUserProfile = async (req: any, res: any) => {
 export const updateUserProfile = async (req: any, res: any) => {
     try {
         const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
-        const { username, email, phoneNum } = req.body;
+        const { username, email, phoneNum, password } = req.body;
         
         console.log("Update Profile Request:", { userId, username, email, phoneNum });
 
@@ -145,6 +145,13 @@ export const updateUserProfile = async (req: any, res: any) => {
         user.username = username;
         user.email = email;
         user.phoneNum = phoneNum;
+        
+        // If password is provided, hash and update it
+        if (password && password.trim() !== '') {
+            const hashedPassword = await hashPassword(password);
+            user.password = hashedPassword;
+        }
+        
         await user.save();
 
         return res.status(200).json({ message: 'User profile updated successfully' });
