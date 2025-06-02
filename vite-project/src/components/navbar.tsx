@@ -26,17 +26,18 @@ const Navbar: React.FC = () => {
           <i className={isMenuOpen ? 'fas fa-times' : 'fas fa-bars'} />
         </div>
         
-        <ul className={isMenuOpen ? 'nav-menu active' : 'nav-menu'}>
-          <li className="nav-item">
+        <ul className={isMenuOpen ? 'nav-menu active' : 'nav-menu'}>          <li className="nav-item">
             <NavLink to="/home" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Home
             </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink to="/create-auction" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Create Auction
-            </NavLink>
-          </li>
+          {isAuthenticated && user?.role === 'admin' && (
+            <li className="nav-item">
+              <NavLink to="/create-auction" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                Create Auction
+              </NavLink>
+            </li>
+          )}
           {isAuthenticated && (
             <>
               <li className="nav-item">

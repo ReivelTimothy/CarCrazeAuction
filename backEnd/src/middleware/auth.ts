@@ -33,6 +33,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
             }
 
             req.body.userId = userId;  // Store the userId in req.body
+            req.body.role = role;      // Store the role in req.body
 
             next(); // Continue to the next middleware or route handler
         }

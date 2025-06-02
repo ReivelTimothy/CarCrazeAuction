@@ -12,10 +12,9 @@ interface AuctionWithVehicle extends Auction {
 }
 
 const Home: React.FC = () => {
-    const [auctions, setAuctions] = useState<AuctionWithVehicle[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [auctions, setAuctions] = useState<AuctionWithVehicle[]>([]);    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-    const { user } = useAuth();
+    // const { user } = useAuth(); // Currently unused
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,15 +48,16 @@ const Home: React.FC = () => {
             }
         };
         fetchAuctions();
-    }, []);
-
-    const formatDate = (dateString: string | Date) => {
+    }, []);    const formatDate = (dateString: string | Date) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric', 
             month: 'long', 
             day: 'numeric'
         });
     };
+
+    // Function currently unused but may be needed for future features
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
     const calculateTimeLeft = (endDate: string | Date) => {
         const difference = new Date(endDate).getTime() - new Date().getTime();

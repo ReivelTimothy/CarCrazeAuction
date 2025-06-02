@@ -111,15 +111,39 @@ export const loginUser = async (req: any, res: any) => {
 // 4. Get User Profile
 export const getUserProfile = async (req: any, res: any) => {
     try {
-        const userId = req.body.userId; // Assuming you have middleware to extract userId from token
-        console.log("Get Profile Request:", { userId });
-        // Find the user by ID
-        const user = await User.findOne({ where: { user_id: userId } });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+        const userId = req.body.userId; // Extracted from JWT token
+        const role = req.body.role;     // Role extracted from JWT token
+        console.log("Get Profile Request:", { userId, role });
+        
+        if (role === 'admin') {
+            // Find the admin by ID
+            const admin = await Admin.findOne({ where: { admin_id: userId } });
+            if (!admin) {
+                return res.status(404).json({ message: 'Admin not found' });
+            }
+            // Return admin profile with role information
+            return res.status(200).json({
+                user_id: admin.admin_id,
+                username: admin.username,
+                email: admin.email,
+                phoneNum: admin.phoneNum,
+                role: 'admin'
+            });
+        } else {
+            // Find the user by ID
+            const user = await User.findOne({ where: { user_id: userId } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            // Return user profile with role information
+            return res.status(200).json({
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+                phoneNum: user.phoneNum,
+                role: 'user'
+            });
         }
-
-        return res.status(200).json(user);
     } catch (error) {
         console.error('Error fetching user profile:', error);
         return res.status(500).json({ message: 'Internal server error' });

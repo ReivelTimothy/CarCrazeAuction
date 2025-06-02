@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createVehicle } from '../services/vehicleService';
 import { createAuction } from '../services/auctionService';
+import { useAuth } from '../context/AuthContext';
 import '../styles/createAuction.css';
 
 const CreateAuction: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  // Check if user is admin
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        navigate('/login');
+        return;
+      }
+      
+      if (user?.role !== 'admin') {
+        alert('Access denied. Only administrators can create auctions.');
+        navigate('/');
+        return;
+      }
+    }
+  }, [isAuthenticated, user, loading, navigate]);
 
   // Vehicle form state
   const [vehicleData, setVehicleData] = useState({
@@ -30,10 +48,9 @@ const CreateAuction: React.FC = () => {
     startingPrice: 0,
     status: 'pending' as 'pending' | 'active' | 'closed',
     category: 'Cars',
-    image: '' as string | File
-  });
+    image: '' as string | File  });
 
-  const [loading, setLoading] = useState(false);
+  const [componentLoading, setComponentLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1); // 1 for vehicle info, 2 for auction info
 
@@ -97,9 +114,8 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     setError('Please fill all required auction fields');
     return;
   }
-
   try {
-    setLoading(true);
+    setComponentLoading(true);
 
     // Create the vehicle first
     const newVehicle = await createVehicle(vehicleData);
@@ -120,9 +136,8 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
     navigate(`/auction/${newAuction.auction_id}`);
   } catch (err: any) {
     console.error('Error creating auction:', err);
-    setError(err.message || 'Failed to create auction. Please try again.');
-  } finally {
-    setLoading(false);
+    setError(err.message || 'Failed to create auction. Please try again.');  } finally {
+    setComponentLoading(false);
   }
 };
   return (
@@ -396,23 +411,21 @@ const handleAuctionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectE
                   <option value="Electric">Electric Vehicles</option>
                 </select>
               </div>
-            </div>
-
-            <div className="form-actions">
+            </div>            <div className="form-actions">
               <button
                 type="button"
                 className="btn btn-secondary"
                 onClick={handlePreviousStep}
-                disabled={loading}
+                disabled={componentLoading}
               >
                 Back: Vehicle Details
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={loading}
+                disabled={componentLoading}
               >
-                {loading ? 'Creating Auction...' : 'Create Auction'}
+                {componentLoading ? 'Creating Auction...' : 'Create Auction'}
               </button>
             </div>
           </form>

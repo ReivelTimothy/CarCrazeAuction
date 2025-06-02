@@ -25,8 +25,11 @@ export const createAuction = (auctionData: Partial<Auction>): Promise<Auction> =
   }
   console.log("FormData:", formData.get('image'));
 
-  return fetch('http://localhost:3000/auction/createAuction', {
+  return fetch('http://localhost:3000/admin/createAuction', {
     method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
     body: formData,
   }).then(res => {
     if (!res.ok) throw new Error('Failed to create auction');
@@ -35,5 +38,5 @@ export const createAuction = (auctionData: Partial<Auction>): Promise<Auction> =
 };
 
 export const updateAuctionStatus = (id: string, status: 'active' | 'closed' | 'pending'): Promise<Auction> => {
-  return fetchFromAPI(`/auction/${id}/updateAuctionStatus`, 'PUT', { status });
+  return fetchFromAPI(`/admin/${id}/updateAuctionStatus`, 'PUT', { status });
 };

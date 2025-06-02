@@ -1,11 +1,11 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
+  "main": "index.js",  "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
-    "dev": "ts-node src/app.ts"
+    "dev": "ts-node src/app.ts",
+    "seed": "ts-node seeders/seed.ts"
   },
   "author": "",
   "license": "ISC",

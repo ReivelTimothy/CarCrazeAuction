@@ -500,6 +500,192 @@
   margin-bottom: 1.5rem;
 }
 
+/* Admin Panel Styles */
+.admin-panel {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  border: 2px solid #e1ecf4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(30, 86, 160, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+}
+
+.admin-panel h3 {
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-panel h3::before {
+  content: '⚙️';
+  font-size: 1.2rem;
+}
+
+.admin-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+  text-transform: capitalize;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.admin-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.admin-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.admin-btn:not(:disabled):hover::before {
+  left: 100%;
+}
+
+.admin-btn-open {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.admin-btn-open:not(:disabled):hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.admin-btn-close {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.admin-btn-close:not(:disabled):hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.admin-btn-pending {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.admin-btn-pending:not(:disabled):hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+/* Admin Status Messages */
+.status-update-error,
+.status-update-success {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+.status-update-error {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  color: #dc2626;
+  border-left: 4px solid #ef4444;
+}
+
+.status-update-error::before {
+  content: '⚠️';
+}
+
+.status-update-success {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  color: #16a34a;
+  border-left: 4px solid #22c55e;
+}
+
+.status-update-success::before {
+  content: '✅';
+}
+
+/* Animations */
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Admin Panel */
+@media (max-width: 768px) {
+  .admin-panel {
+    margin: 1rem 0;
+    padding: 1rem;
+  }
+  
+  .admin-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .admin-btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-panel h3 {
+    font-size: 1.1rem;
+  }
+  
+  .admin-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
 @media (max-width: 960px) {
   .auction-main-info {
     grid-template-columns: 1fr;

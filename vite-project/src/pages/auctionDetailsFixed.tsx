@@ -8,7 +8,8 @@ import type { Auction, Vehicle, Bid } from '../types/types';
 import '../styles/auctionDetails.css';
 
 const AuctionDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();  const [auction, setAuction] = useState<Auction | null>(null);
+  const { id } = useParams<{ id: string }>();
+  const [auction, setAuction] = useState<Auction | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [highestBid, setHighestBid] = useState<Bid | null>(null);
   const [bidAmount, setBidAmount] = useState<string>('');
@@ -256,17 +257,12 @@ const AuctionDetails: React.FC = () => {
           </div>
           
           <div className="auction-info">
-            <h1>{auction.title}</h1>            <div className="auction-meta-details">
+            <h1>{auction.title}</h1>
+            <div className="auction-meta-details">
               <div className="meta-item">
                 <span className="meta-label">Current Bid:</span>
                 <span className="meta-value price">$  {auction.currentPrice.toLocaleString()}</span>
               </div>
-              {highestBid && (
-                <div className="meta-item">
-                  <span className="meta-label">Highest Bidder:</span>
-                  <span className="meta-value">User {highestBid.user_id}</span>
-                </div>
-              )}
               <div className="meta-item">
                 <span className="meta-label">Time Left:</span>
                 <span className="meta-value time-left">{timeLeft}</span>
@@ -275,7 +271,7 @@ const AuctionDetails: React.FC = () => {
                 <span className="meta-label">Ending:</span>
                 <span className="meta-value">{formatDate(auction.endDate)}</span>
               </div>
-            </div>
+            </div>            
             {isAuctionActive && user && (
               <div className="bid-section">
                 {bidError && <div className="bid-error">{bidError}</div>}

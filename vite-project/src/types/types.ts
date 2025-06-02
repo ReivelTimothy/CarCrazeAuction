@@ -5,6 +5,7 @@ export interface User {
   email: string;
   password?: string;
   phoneNum: string;
+  role?: 'user' | 'admin';
 }
 
 // Vehicle types
