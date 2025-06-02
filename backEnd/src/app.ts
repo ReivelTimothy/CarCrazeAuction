@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import userRoutes from './routes/userRoutes';
 import vehicleRoutes from './routes/vehicleRoutes';
@@ -14,7 +15,8 @@ import { Bid } from '../models/bid';
 import { Transaction } from '../models/transaction';
 import cors from 'cors';
 
-
+// Load environment variables
+dotenv.config();
 
 const config = require('../config/config.json');
 const app = express();
