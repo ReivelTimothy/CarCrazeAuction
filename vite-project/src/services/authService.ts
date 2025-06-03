@@ -24,3 +24,7 @@ export const updateUserProfile = (userData: Partial<User>): Promise<{ message: s
 export const deleteUserProfile = (): Promise<{ message: string }> => {
   return fetchFromAPI('/user/deleteUser', 'DELETE');
 };
+
+export const changePassword = (passwordData: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
+  return fetchFromAPI('/user/changePassword', 'PUT', passwordData);
+};

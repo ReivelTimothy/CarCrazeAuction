@@ -10,7 +10,7 @@ const Login: React.FC = () => {
     const [loginError, setLoginError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { login, isAuthenticated, error } = useAuth();
+    const { login, isAuthenticated, error, clearError } = useAuth();
 
     useEffect(() => {
         // If user is already authenticated, redirect to home
@@ -24,11 +24,10 @@ const Login: React.FC = () => {
         if (error) {
             setLoginError(error);
         }
-    }, [error]);
-
-    const handleLogin = async (e: React.FormEvent) => {
+    }, [error]);    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoginError("");
+        clearError(); // Clear any previous AuthContext errors
         
         if (!email || !password) {
             setLoginError("Email and password are required");
@@ -38,13 +37,13 @@ const Login: React.FC = () => {
         try {
             setIsLoading(true);
             await login({ email, password });
-            navigate('/');
+            // Remove navigation from here - let useEffect handle it when isAuthenticated becomes true
         } catch (error: any) {
             setLoginError(error.message || "Login failed. Please check your credentials.");
         } finally {
             setIsLoading(false);
         }
-    };    return (
+    };return (
         <div className="login-container">
             <div className="login-box">
                 <h1>WELCOME TO
@@ -52,21 +51,25 @@ const Login: React.FC = () => {
                     CAR CRAZE AUCTION
                 </h1>
                 {loginError && <p className="error-message">{loginError}</p>}
-                <form onSubmit={handleLogin}>
-                    <input
+                <form onSubmit={handleLogin}>                    <input
                         type="text"
                         placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (loginError) setLoginError("");
+                            if (error) clearError(); // Clear AuthContext error
+                        }}
                         disabled={isLoading}
                         required
                     />
-                    <div className="password-container">
-                        <input
+                    <div className="password-container">                        <input
                             type={showPassword ? "text" : "password"}
                             placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (loginError) setLoginError("");
+                                if (error) clearError(); // Clear AuthContext error
+                            }}
                             disabled={isLoading}
                             required
                         />

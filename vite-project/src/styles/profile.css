@@ -762,6 +762,92 @@
   }
 }
 
+/* Password change form styles */
+.password-change-form {
+  background: var(--white);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  transition: var(--transition-normal);
+  width: 100%;
+  max-width: 500px;
+}
+
+.password-change-form:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.password-change-form h2 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.password-change-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.password-change-form .form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--dark-gray);
+  font-size: 0.9rem;
+}
+
+.password-change-form .form-group input {
+  width: 100%;
+  padding: 16px 20px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--border-radius-lg);
+  font-size: 1rem;
+  transition: all var(--transition-medium);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.password-change-form .form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(30, 86, 160, 0.1);
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.password-change-form .form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.password-change-form .form-actions button {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  font-size: 1rem;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .password-change-form {
+    margin-top: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .password-change-form .form-actions {
+    flex-direction: column;
+  }
+}
+
 /* Animation for stats card shimmer effect */
 @keyframes shimmer {
   0% {

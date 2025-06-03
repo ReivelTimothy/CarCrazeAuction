@@ -46,13 +46,13 @@ export const placeBid = async (auctionId: string, amountt: number, userId:string
       // You can emit an event or return this information to update the UI
     }
     
-    return response;
-  } catch (error: any) {
+    return response;  } catch (error: any) {
     // Provide more user-friendly error messages based on backend responses
     if (error.message.includes('already the highest bidder')) {
       throw new Error('You are already the highest bidder for this auction.');
     } else if (error.message.includes('must be at least')) {
-      throw new Error('Your bid is too low. Please increase your bid amount.');
+      // Preserve the specific minimum bid amount information from backend
+      throw new Error(error.message);
     } else if (error.message.includes('auction has ended')) {
       throw new Error('This auction has already ended. No more bids can be placed.');
     } else if (error.message.includes('auction is already closed')) {

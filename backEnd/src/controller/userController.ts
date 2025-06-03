@@ -218,3 +218,65 @@ export const getAllUsers = async (req: any, res: any) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+// 8. Change Password
+export const changePassword = async (req: any, res: any) => {
+    try {
+        const userId = req.body.userId; // The userId is stored in req.body by the authenticateJWT middleware
+        const role = req.body.role;     // Role extracted from JWT token
+        const { currentPassword, newPassword } = req.body;
+        
+        console.log("Change Password Request:", { userId, role });
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Current password and new password are required' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+        }
+
+        if (role === 'admin') {
+            // Find the admin by ID
+            const admin = await Admin.findOne({ where: { admin_id: userId } });
+            if (!admin) {
+                return res.status(404).json({ message: 'Admin not found' });
+            }
+
+            // Verify current password
+            const isCurrentPasswordValid = await comparePassword(currentPassword, admin.password);
+            if (!isCurrentPasswordValid) {
+                return res.status(401).json({ message: 'Current password is incorrect' });
+            }
+
+            // Hash and update new password
+            const hashedNewPassword = await hashPassword(newPassword);
+            admin.password = hashedNewPassword;
+            await admin.save();
+
+            return res.status(200).json({ message: 'Admin password updated successfully' });
+        } else {
+            // Find the user by ID
+            const user = await User.findOne({ where: { user_id: userId } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Verify current password
+            const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+            if (!isCurrentPasswordValid) {
+                return res.status(401).json({ message: 'Current password is incorrect' });
+            }
+
+            // Hash and update new password
+            const hashedNewPassword = await hashPassword(newPassword);
+            user.password = hashedNewPassword;
+            await user.save();
+
+            return res.status(200).json({ message: 'User password updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error changing password:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+}

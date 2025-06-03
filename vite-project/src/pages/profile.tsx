@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, updateUserProfile, deleteUserProfile } from '../services/authService';
+import { getUserProfile, updateUserProfile, deleteUserProfile, changePassword } from '../services/authService';
 import { getUserParticipatedAuctions, getUserWonAuctions, getAdminStatistics } from '../services/auctionService';
 import { checkDatabaseIntegrity, fixDatabaseIntegrity, processExpiredAuctions } from '../services/databaseService';
 import { formatIntegrityResults, formatIntegrityFixResults, formatExpiredAuctionsResults } from '../utils/adminUtils';
@@ -11,8 +11,7 @@ import '../styles/profile.css';
 const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
-  const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState({
     username: '',
     email: '',
@@ -24,6 +23,17 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
+  
+  // Password change states
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
   
   // Database tools loading states
   const [checkingIntegrity, setCheckingIntegrity] = useState(false);
@@ -98,8 +108,7 @@ const Profile: React.FC = () => {
       setLoading(false);
     }
   };
-  
-  const handleDeleteAccount = async () => {
+    const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
         await deleteUserProfile();
@@ -109,6 +118,57 @@ const Profile: React.FC = () => {
         console.error('Error deleting account:', err);
         setError('Failed to delete account');
       }
+    }
+  };
+
+  const handlePasswordInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      setPasswordError(null);
+      
+      await changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      
+      setPasswordSuccess('Password changed successfully!');
+      setPasswordForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordChange(false);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setPasswordSuccess(null);
+      }, 3000);
+    } catch (err: any) {
+      console.error('Error changing password:', err);
+      setPasswordError(err.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
     }
   };
   
@@ -142,6 +202,8 @@ const Profile: React.FC = () => {
         <div className="profile-card">
           {error && <div className="profile-error">{error}</div>}
           {updateSuccess && <div className="profile-success">{updateSuccess}</div>}
+          {passwordError && <div className="profile-error">{passwordError}</div>}
+          {passwordSuccess && <div className="profile-success">{passwordSuccess}</div>}
           
           <div className="profile-avatar">
             <div className="avatar-placeholder">
@@ -219,23 +281,90 @@ const Profile: React.FC = () => {
                 <label>Phone Number</label>
                 <p>{editedUser.phoneNum}</p>
               </div>
-              
-              <div className="profile-actions">
+                <div className="profile-actions">
                 <button 
                   onClick={() => setIsEditing(true)}
                   className="btn btn-primary"
                 >
                   Edit Profile
                 </button>
+                {user?.role !== 'admin' && (
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="btn btn-danger"
+                  >
+                    Delete Account
+                  </button>
+                )}
                 <button 
-                  onClick={handleDeleteAccount}
-                  className="btn btn-danger"
+                  onClick={() => setShowPasswordChange(prev => !prev)}
+                  className="btn btn-secondary"
                 >
-                  Delete Account
-                </button>
-              </div>
+                  {showPasswordChange ? 'Cancel' : 'Change Password'}
+                </button>              </div>
             </div>
-          )}        </div>
+          )}
+        </div>
+          {/* Password change form */}
+          {showPasswordChange && (
+            <div className="password-change-form">
+              <h2>Change Password</h2>
+              <form onSubmit={handlePasswordChange}>
+                <div className="form-group">
+                  <label htmlFor="currentPassword">Current Password</label>
+                  <input
+                    type="password"
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="newPassword">New Password</label>
+                  <input
+                    type="password"
+                    id="newPassword"
+                    name="newPassword"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="confirmPassword">Confirm New Password</label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={passwordForm.confirmPassword}
+                    onChange={handlePasswordInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPasswordChange(false)}
+                    className="btn btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={passwordLoading}
+                  >
+                    {passwordLoading ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           {/* Role-based content rendering */}
         {!user?.role && (
           <div className="loading-container">
