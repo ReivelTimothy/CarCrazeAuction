@@ -38,7 +38,9 @@ export const createAuction = (auctionData: Partial<Auction>): Promise<Auction> =
 };
 
 export const updateAuctionStatus = (id: string, status: 'active' | 'closed' | 'pending'): Promise<Auction> => {
-  return fetchFromAPI(`/admin/${id}/updateAuctionStatus`, 'PUT', { status });
+  // Convert 'active' to 'OPEN' for the backend
+  const backendStatus = status === 'active' ? 'OPEN' : status;
+  return fetchFromAPI(`/admin/${id}/updateAuctionStatus`, 'PUT', { status: backendStatus });
 };
 
 // New functions for user participation data

@@ -6,6 +6,7 @@ import adminRoutes from './routes/adminRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import bidRoutes from './routes/bidRoutes';
 import auctionRoutes from './routes/auctionRoutes';
+import scheduledTasksRoutes from './routes/scheduledTasksRoutes';
 import { Sequelize } from 'sequelize-typescript';
 import { User } from '../models/user';
 import { Admin } from '../models/admin';
@@ -42,6 +43,7 @@ app.use('/admin', adminRoutes);
 app.use('/transaction', transactionRoutes);
 app.use('/bid', bidRoutes);
 app.use('/auction', auctionRoutes);
+app.use('/tasks', scheduledTasksRoutes);
 app.use('/uploads', express.static('uploads')); // Serve static files from the uploads directory
 // ------------------------------------
 

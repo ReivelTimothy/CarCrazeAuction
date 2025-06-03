@@ -16,19 +16,33 @@ export const fetchFromAPI = async (endpoint: string, method: string = 'GET', bod
   if (body) {
     config.body = JSON.stringify(body);
   }
-
-  const response = await fetch(`${API_URL}${endpoint}`, config);  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+  try {
+    console.log(`Making API call to: ${API_URL}${endpoint}`, {
+      method,
+      headers: config.headers,
+      body: body ? JSON.stringify(body) : undefined
+    });
     
-    // Special handling for bid 404 errors - we'll throw an error with the specific message
-    // so it can be caught and handled appropriately
-    if (response.status === 404 && endpoint.includes('/bid/') && endpoint.includes('/getHighestBid')) {
-      console.log('Got expected 404 for bid endpoint:', endpoint);
-      throw new Error(errorData.message || 'No bids found');
+    const response = await fetch(`${API_URL}${endpoint}`, config);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ 
+        message: `Server returned ${response.status}: ${response.statusText}` 
+      }));
+      
+      // Special handling for bid 404 errors - we'll throw an error with the specific message
+      // so it can be caught and handled appropriately
+      if (response.status === 404 && endpoint.includes('/bid/') && endpoint.includes('/getHighestBid')) {
+        console.log('Got expected 404 for bid endpoint:', endpoint);
+        throw new Error(errorData.message || 'No bids found');
+      }
+      
+      throw new Error(errorData.message || `Request failed with status: ${response.status}`);
     }
     
-    throw new Error(errorData.message || 'Network response was not ok');
-  }
-
   return await response.json();
+  } catch (error) {
+    console.error(`API call failed: ${endpoint}`, error);
+    throw error;
+  }
 };

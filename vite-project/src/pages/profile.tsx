@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, updateUserProfile, deleteUserProfile } from '../services/authService';
 import { getUserParticipatedAuctions, getUserWonAuctions, getAdminStatistics } from '../services/auctionService';
+import { checkDatabaseIntegrity, fixDatabaseIntegrity, processExpiredAuctions } from '../services/databaseService';
+import { formatIntegrityResults, formatIntegrityFixResults, formatExpiredAuctionsResults } from '../utils/adminUtils';
 import type { Auction, AdminStatistics } from '../types/types';
 import '../styles/profile.css';
 
@@ -22,6 +24,11 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
+  
+  // Database tools loading states
+  const [checkingIntegrity, setCheckingIntegrity] = useState(false);
+  const [fixingIntegrity, setFixingIntegrity] = useState(false);
+  const [processingAuctions, setProcessingAuctions] = useState(false);
     useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -258,9 +265,17 @@ const Profile: React.FC = () => {
                   <div className="stat-card">
                     <h3>Total Bids</h3>
                     <p className="stat-number">{adminStats.totalBids}</p>
-                  </div>
+                  </div>                </div>
+                  <div className="admin-actions">
+                  <button onClick={() => navigate('/create-auction')} className="btn btn-primary admin-action-btn">
+                    <i className="fa fa-plus-circle"></i> Create New Auction
+                  </button>
+                  <button onClick={() => navigate('/admin/manage')} className="btn btn-secondary admin-action-btn">
+                    <i className="fa fa-cog"></i> Manage Auctions
+                  </button>
                 </div>
-                  <div className="admin-sections">
+                
+                <div className="admin-sections">
                   <div className="recent-auctions">
                     <h3>Recent Auctions</h3>
                     {adminStats.recentAuctions.length > 0 ? (
@@ -333,16 +348,118 @@ const Profile: React.FC = () => {
                     </div>
                   ) : (
                     <p>No recent bid activity found.</p>
-                  )}
+                  )}                </div>
+                
+                {/* Administrator Maintenance Guide */}
+                <div className="maintenance-guide">
+                  <h3>Administrator Database Maintenance Guide</h3>
+                  <div className="guide-content">
+                    <div className="guide-item">
+                      <h4>Why Database Maintenance Matters</h4>
+                      <p>Regular database maintenance ensures data consistency and system reliability. This is especially important for the auction system where transactions involve financial data.</p>
+                    </div>
+                    
+                    <div className="guide-item">
+                      <h4>Recommended Maintenance Schedule</h4>
+                      <ul>
+                        <li><strong>Daily:</strong> Process expired auctions to close completed auctions</li>
+                        <li><strong>Weekly:</strong> Run database integrity checks</li>
+                        <li><strong>Monthly:</strong> Fix any integrity issues that have been found</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="guide-item">
+                      <h4>Common Issues</h4>
+                      <ul>
+                        <li><strong>Orphaned Bids:</strong> Bids without valid user or auction references</li>
+                        <li><strong>Inconsistent Transactions:</strong> Transactions missing user or auction references</li>
+                        <li><strong>Incomplete Auctions:</strong> Auctions that have ended but not been processed</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="admin-actions">
-                  <button onClick={() => navigate('/create-auction')} className="btn btn-primary">
-                    Create New Auction
-                  </button>
-                  <button onClick={() => navigate('/admin/manage')} className="btn btn-secondary">
-                    Manage Auctions
-                  </button>
+                {/* Database Tools Section */}
+                <div className="database-tools">
+                  <h3>Database Maintenance Tools</h3>
+                  <div className="tool-description">
+                    <p>Use these tools to ensure data integrity across the Car Craze Auction system. Regular maintenance helps prevent inconsistencies between auctions, bids, and transactions.</p>
+                  </div>
+                  <div className="database-tool-actions">
+                    <button
+                      className="btn-tool" 
+                      onClick={async () => {
+                        setCheckingIntegrity(true);
+                        try {
+                          const results = await checkDatabaseIntegrity();
+                          console.log('Database integrity results:', results);
+                          if (results.error) {
+                            alert(`Error during integrity check: ${results.error}`);
+                          } else {
+                            alert(formatIntegrityResults(results));
+                          }
+                        } catch (err) {
+                          console.error('Database integrity check failed:', err);
+                          alert(`Database integrity check failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                        } finally {
+                          setCheckingIntegrity(false);
+                        }
+                      }}
+                      disabled={checkingIntegrity}
+                    >
+                      {checkingIntegrity ? 'Checking...' : 'Check Database Integrity'}
+                    </button>
+                    <button
+                      className="btn-tool btn-caution" 
+                      onClick={async () => {
+                        if (window.confirm('⚠️ This action will remove inconsistent records from the database.\n\nAre you sure you want to proceed with fixing database integrity issues?')) {
+                          setFixingIntegrity(true);
+                          try {
+                            const results = await fixDatabaseIntegrity();
+                            console.log('Database fix results:', results);
+                            if (results.error) {
+                              alert(`Error fixing integrity issues: ${results.error}`);
+                            } else {
+                              alert(formatIntegrityFixResults(results));
+                            }
+                          } catch (err) {
+                            console.error('Database fix failed:', err);
+                            alert(`Failed to fix database integrity issues: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                          } finally {
+                            setFixingIntegrity(false);
+                          }
+                        }
+                      }}
+                      disabled={fixingIntegrity}
+                    >
+                      {fixingIntegrity ? 'Fixing Issues...' : 'Fix Integrity Issues'}
+                    </button>
+                    <button
+                      className="btn-tool btn-warning" 
+                      onClick={async () => {
+                        if (window.confirm('This action will close any auctions that have reached their end date and process winners.\n\nAre you sure you want to continue?')) {
+                          setProcessingAuctions(true);
+                          try {
+                            const results = await processExpiredAuctions();
+                            console.log('Expired auctions check results:', results);
+                            if (results.error) {
+                              alert(`Error processing expired auctions: ${results.error}`);
+                            } else {
+                              alert(formatExpiredAuctionsResults(results));
+                            }
+                          } catch (err) {
+                            console.error('Expired auctions check failed:', err);
+                            alert(`Failed to check expired auctions: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                          } finally {
+                            setProcessingAuctions(false);
+                          }
+                        }
+                      }}
+                      disabled={processingAuctions}
+                    >
+                      {processingAuctions ? 'Processing...' : 'Process Expired Auctions'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (

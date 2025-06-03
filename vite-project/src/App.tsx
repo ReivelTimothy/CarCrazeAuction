@@ -11,6 +11,7 @@ import AuctionDetails from './pages/auctionDetails';
 import Profile from './pages/profile';
 import CreateAuction from './pages/createAuction';
 import TransactionDetails from './pages/transactionDetails';
+import AdminPage from './pages/adminPage';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
@@ -28,16 +29,17 @@ const AppRoutes: React.FC = () => {
   
   return (
     <>
-      {isAuthenticated && <Navbar />}
-      <div className={`main-container ${isAuthenticated ? 'with-navbar' : ''}`}>
+      {isAuthenticated && <Navbar />}      <div className={`main-container ${isAuthenticated ? 'with-navbar' : ''}`}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
-          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />          <Route path="/auction/:id" element={<ProtectedRoute element={<AuctionDetails />} />} />
+          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />          
+          <Route path="/auction/:id" element={<ProtectedRoute element={<AuctionDetails />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
           <Route path="/create-auction" element={<ProtectedRoute element={<CreateAuction />} />} />
           <Route path="/transaction/:id" element={<ProtectedRoute element={<TransactionDetails />} />} />
+          <Route path="/admin/manage" element={<ProtectedRoute element={<AdminPage />} />} />
         </Routes>
       </div>
     </>

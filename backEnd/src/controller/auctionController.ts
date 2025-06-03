@@ -70,9 +70,50 @@ export const updateAuctionStatus = async (req: any, res: any) => {
         const auction = await Auction.findOne({ where: { auction_id: auctionId } });
         if (!auction) {
             return res.status(404).json({ message: "Auction not found" });
+        }        console.log("Current auction status:", auction.status, "New status:", status);
+        
+        // Normalize status to correct database format
+        let normalizedStatus = status;
+        if (status.toLowerCase() === 'active') {
+            normalizedStatus = 'OPEN';
         }
-        auction.status = status;
+        
+        // Update auction status
+        auction.status = normalizedStatus;
         await auction.save();
+        
+        // If status changed to "closed", handle the winner determination
+        if (status === 'closed' || status.toLowerCase() === 'closed') {
+            // Find the highest bid
+            const highestBid = await Bid.findOne({
+                where: { auction_id: auctionId },
+                order: [['amount', 'DESC']]
+            });
+            
+            if (highestBid) {
+                // Update auction's current price to match the highest bid
+                auction.currentPrice = highestBid.amount;
+                await auction.save();
+                
+                // Check if a transaction already exists for this auction
+                const existingTransaction = await Transaction.findOne({
+                    where: { auction_id: auctionId }
+                });
+                
+                if (!existingTransaction) {
+                    // Create a transaction record for the winner
+                    await Transaction.create({
+                        auction_id: auctionId,
+                        user_id: highestBid.user_id,
+                        amount: highestBid.amount,
+                        transactionDate: new Date(),
+                        status: 'Pending',
+                        paymentMethod: 'Not Selected'
+                    });
+                }
+            }
+        }
+        
         res.status(200).json(auction);
     } catch (error) {
         console.error("Error updating auction status:", error);

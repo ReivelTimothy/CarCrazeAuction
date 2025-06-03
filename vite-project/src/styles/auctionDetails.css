@@ -929,3 +929,103 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Bid Confirmation Dialog Styles */
+.bid-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.bid-confirmation-dialog {
+  background-color: white;
+  border-radius: 10px;
+  padding: 2rem;
+  max-width: 90%;
+  width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.3s ease;
+}
+
+.bid-confirmation-dialog h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--light-gray);
+  padding-bottom: 0.75rem;
+}
+
+.bid-confirmation-dialog p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.bid-confirmation-dialog strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.bid-confirmation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.bid-confirmation-actions button {
+  padding: 0.75rem 2rem;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bid-confirmation-actions button.btn-secondary {
+  background-color: var(--light-gray);
+  color: var(--text-color);
+  border: none;
+}
+
+.bid-confirmation-actions button.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.bid-confirmation-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bid-confirmation-actions button:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

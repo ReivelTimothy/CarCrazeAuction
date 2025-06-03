@@ -84,10 +84,22 @@ export const placeBid = async (req: AuthRequest, res: any) => {
         if (!auction) {
             return res.status(404).json({ message: "Auction not found" });
         }
-        
-        // Check if auction is already closed
+          // Check if auction is already closed
         if (auction.status === 'closed') {
             return res.status(400).json({ message: "This auction is already closed. No more bids can be placed." });
+        }
+
+        // Get current highest bid to check if user is already the highest bidder
+        const currentHighestBid = await Bid.findOne({
+            where: { auction_id },
+            order: [['amount', 'DESC']]
+        });
+        
+        if (currentHighestBid && currentHighestBid.user_id === user_id) {
+            return res.status(400).json({ 
+                message: "You are already the highest bidder. No need to outbid yourself.",
+                currentBid: currentHighestBid.amount
+            });
         }
         
         // Check if auction end time has passed
@@ -128,6 +140,18 @@ export const placeBid = async (req: AuthRequest, res: any) => {
                 return res.status(400).json({ message: "This auction has ended with no bids." });
             }
         }
+          // Calculate minimum bid increment (e.g., 5% of current price or at least 1,000,000)
+        const minIncrement = Math.max(auction.currentPrice * 0.05, 1000000);
+        const minAllowedBid = auction.currentPrice + minIncrement;
+        
+        // Check if bid meets minimum increment requirement
+        if (amount < minAllowedBid) {
+            return res.status(400).json({ 
+                message: `Your bid must be at least ${minIncrement.toLocaleString()} above the current price.`,
+                currentPrice: auction.currentPrice,
+                minRequiredBid: minAllowedBid
+            });
+        }
         
         // Create a new bid
         const newBid = await Bid.create({
@@ -136,14 +160,27 @@ export const placeBid = async (req: AuthRequest, res: any) => {
             amount,
             bidTime: new Date()
         });
-        
-        // Update auction's current price
+          // Update auction's current price
         if (amount > auction.currentPrice) {
             auction.currentPrice = amount;
+            
+            // Check if this is a last-minute bid (within 2 minutes of end time)
+            const timeUntilEnd = endDate.getTime() - now.getTime();
+            const TWO_MINUTES_MS = 2 * 60 * 1000;
+            
+            if (timeUntilEnd > 0 && timeUntilEnd <= TWO_MINUTES_MS) {
+                // Extend auction by 2 more minutes
+                auction.endDate = new Date(endDate.getTime() + TWO_MINUTES_MS);
+                console.log(`Auction end time extended to ${auction.endDate} due to last-minute bid`);
+            }
+            
             await auction.save();
         }
         
-        res.status(201).json(newBid);
+        res.status(201).json({
+            ...newBid.toJSON(),
+            auctionEndDate: auction.endDate // Return updated end date if it was extended
+        });
     } catch (error) {
         console.error("Error placing bid:", error);
         res.status(500).json({ message: "Error placing bid", error });

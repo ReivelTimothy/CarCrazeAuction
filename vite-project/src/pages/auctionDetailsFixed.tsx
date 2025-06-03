@@ -17,11 +17,12 @@ const AuctionDetails: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [bidError, setBidError] = useState<string | null>(null);
-  const [bidSuccess, setBidSuccess] = useState<string | null>(null);
+  const [bidError, setBidError] = useState<string | null>(null);  const [bidSuccess, setBidSuccess] = useState<string | null>(null);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
   const [statusUpdateSuccess, setStatusUpdateSuccess] = useState<string | null>(null);
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
+  const [showBidConfirmation, setShowBidConfirmation] = useState<boolean>(false);
+  const [pendingBidAmount, setPendingBidAmount] = useState<number | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -114,8 +115,7 @@ const AuctionDetails: React.FC = () => {
       minute: '2-digit',
     });
   };
-
-  // Modified handleBidSubmit to accept optional amount
+  // Modified to show confirmation dialog first
   const handleBidSubmit = async (e: React.FormEvent | null, customAmount?: number) => {
     if (e) e.preventDefault();
     const amountToBid = customAmount !== undefined ? customAmount : parseFloat(bidAmount);
@@ -124,10 +124,19 @@ const AuctionDetails: React.FC = () => {
       setBidError('This auction has ended.');
       return;
     }
-      console.log(`Bid placed: ${amountToBid} for auction ${auction.auction_id}`);
+    
+    // Store pending bid amount and show confirmation dialog
+    setPendingBidAmount(amountToBid);
+    setShowBidConfirmation(true);
+  };
+
+  // Function to actually submit the bid after confirmation
+  const confirmAndPlaceBid = async () => {
+    if (!auction || !user || pendingBidAmount === null) return;
+    
     try {
       setLoading(true);
-      await placeBid(auction.auction_id, amountToBid, user.user_id);
+      await placeBid(auction.auction_id, pendingBidAmount, user.user_id);
       // Update auction with new bid price
       const updatedAuction = await getAuctionById(id!);
       setAuction(updatedAuction);
@@ -142,9 +151,14 @@ const AuctionDetails: React.FC = () => {
       }
       setBidSuccess('Your bid has been placed successfully!');
       setTimeout(() => setBidSuccess(null), 3000);
+      
+      // Close confirmation dialog
+      setShowBidConfirmation(false);
+      setPendingBidAmount(null);
     } catch (err: any) {
       console.error('Error placing bid:', err);
       setBidError(err.message || 'Failed to place bid. Please try again.');
+      setShowBidConfirmation(false);
     } finally {
       setLoading(false);
     }
@@ -176,7 +190,6 @@ const AuctionDetails: React.FC = () => {
       setStatusUpdateLoading(false);
     }
   };
-
   // Helper to increase bid and submit
   const handleQuickBid = async (increment: number) => {
     if (!auction || !user) return;
@@ -430,8 +443,37 @@ const AuctionDetails: React.FC = () => {
               </div>
             )}
           </div>
+        </div>      </div>
+      
+      {/* Bid Confirmation Dialog */}
+      {showBidConfirmation && pendingBidAmount && (
+        <div className="bid-confirmation-overlay">
+          <div className="bid-confirmation-dialog">
+            <h3>Confirm Your Bid</h3>
+            <p>Are you sure you want to place a bid for <strong>{pendingBidAmount.toLocaleString()} IDR</strong>?</p>
+            <p>This action cannot be undone once confirmed.</p>
+            
+            <div className="bid-confirmation-actions">
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => {
+                  setShowBidConfirmation(false);
+                  setPendingBidAmount(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={confirmAndPlaceBid}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Confirm Bid'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

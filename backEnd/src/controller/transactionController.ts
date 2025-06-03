@@ -99,6 +99,60 @@ export const updateTransactionStatus = async (req: any, res: any) => {
     }
 };
 
+// 6. Clean up transactions for auctions with no valid bids
+export const cleanupInvalidTransactions = async (req: any, res: any) => {
+    try {
+        const transactions = await Transaction.findAll({
+            include: [{
+                model: Auction,
+                required: true
+            }]
+        });
+        
+        let cleanedUp = 0;
+        let details = [];
+        
+        for (const transaction of transactions) {
+            // Check if there's any bid for this auction
+            const bid = await Bid.findOne({
+                where: { auction_id: transaction.auction_id }
+            });
+            
+            // If no bids exist but a transaction does, delete the transaction
+            if (!bid) {
+                details.push({
+                    transaction_id: transaction.transaction_id,
+                    auction_id: transaction.auction_id,
+                    reason: 'No bids found for this auction'
+                });
+                
+                await transaction.destroy();
+                cleanedUp++;
+            }
+            // If bid amount doesn't match transaction amount, that's an issue
+            else if (bid.amount !== transaction.amount) {
+                details.push({
+                    transaction_id: transaction.transaction_id,
+                    auction_id: transaction.auction_id,
+                    reason: `Bid amount (${bid.amount}) doesn't match transaction amount (${transaction.amount})`
+                });
+                
+                // Update transaction to match bid amount
+                await transaction.update({ amount: bid.amount });
+                cleanedUp++;
+            }
+        }
+        
+        res.status(200).json({
+            message: `Cleaned up ${cleanedUp} invalid transactions`,
+            details
+        });
+    } catch (error) {
+        console.error("Error cleaning up transactions:", error);
+        res.status(500).json({ message: "Error cleaning up transactions", error });
+    }
+};
+
 // 6. delete transaction
 export const deleteTransaction = async (req: any, res: any) => {
     try {
