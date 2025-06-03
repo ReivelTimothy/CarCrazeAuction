@@ -11,6 +11,7 @@ import AuctionDetails from './pages/auctionDetails';
 import Profile from './pages/profile';
 import CreateAuction from './pages/createAuction';
 import TransactionDetails from './pages/transactionDetails';
+import TransactionHistory from './pages/transactionHistory';
 import AdminPage from './pages/adminPage';
 
 // Protected Route component
@@ -48,8 +49,8 @@ const AppRoutes: React.FC = () => {
           <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
           <Route path="/home" element={<GuestAllowedRoute element={<Home />} />} />          
           <Route path="/auction/:id" element={<GuestAllowedRoute element={<AuctionDetails />} />} />
-          <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
-          <Route path="/create-auction" element={<ProtectedRoute element={<CreateAuction />} />} />
+          <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />          <Route path="/create-auction" element={<ProtectedRoute element={<CreateAuction />} />} />
+          <Route path="/transaction-history" element={<ProtectedRoute element={<TransactionHistory />} />} />
           <Route path="/transaction/:id" element={<ProtectedRoute element={<TransactionDetails />} />} />
           <Route path="/admin/manage" element={<ProtectedRoute element={<AdminPage />} />} />
         </Routes>

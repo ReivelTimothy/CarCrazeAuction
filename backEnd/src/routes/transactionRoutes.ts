@@ -1,6 +1,5 @@
 import express from 'express';
-import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions, processPayment } from '../controller/transactionController';port express from 'express';
-import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions, processPayment } from '../controller/transactionController';
+import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions, processPayment, getCurrentUserTransactionHistory } from '../controller/transactionController';
 import { authenticateJWT } from '../middleware/auth';
 const transactionRoutes = express.Router();
 
@@ -10,6 +9,8 @@ transactionRoutes.get('/getAllTransactions', authenticateJWT, getAllTransactions
 transactionRoutes.get('/:id/getTransaction', authenticateJWT, getTransactionById);
 // 3. Get Transaction by User ID
 transactionRoutes.get('/:user_id/getTransactionByUserId', authenticateJWT, getTransactionByUserId);
+// 3b. Get current user's transaction history
+transactionRoutes.get('/my-history', authenticateJWT, getCurrentUserTransactionHistory);
 // 4. Create Transaction
 transactionRoutes.post('/createTransaction', authenticateJWT, createTransaction);
 // 5. Update Transaction Status

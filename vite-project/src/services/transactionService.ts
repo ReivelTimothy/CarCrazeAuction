@@ -45,3 +45,8 @@ export const processPayment = (transactionId: string, paymentDetails: {
 }) => {
   return fetchFromAPI(`/transaction/${transactionId}/process-payment`, 'POST', paymentDetails);
 };
+
+// Get current user's transaction history
+export const getCurrentUserTransactionHistory = () => {
+  return fetchFromAPI('/transaction/my-history', 'GET');
+};

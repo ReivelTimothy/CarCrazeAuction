@@ -37,9 +37,13 @@ const Navbar: React.FC = () => {
                 Create Auction
               </NavLink>
             </li>
-          )}
-          {isAuthenticated ? (
+          )}          {isAuthenticated ? (
             <>
+              <li className="nav-item">
+                <NavLink to="/transaction-history" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  Transaction History
+                </NavLink>
+              </li>
               <li className="nav-item">
                 <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                   My Profile

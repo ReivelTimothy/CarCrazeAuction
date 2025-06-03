@@ -5,6 +5,7 @@ import { getUserProfile, updateUserProfile, deleteUserProfile, changePassword } 
 import { getUserParticipatedAuctions, getUserWonAuctions, getAdminStatistics } from '../services/auctionService';
 import { checkDatabaseIntegrity, fixDatabaseIntegrity, processExpiredAuctions } from '../services/databaseService';
 import { formatIntegrityResults, formatIntegrityFixResults, formatExpiredAuctionsResults } from '../utils/adminUtils';
+import TransactionHistory from '../components/TransactionHistory';
 import type { Auction, AdminStatistics } from '../types/types';
 import '../styles/profile.css';
 
@@ -34,11 +35,13 @@ const Profile: React.FC = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
-  
-  // Database tools loading states
+    // Database tools loading states
   const [checkingIntegrity, setCheckingIntegrity] = useState(false);
   const [fixingIntegrity, setFixingIntegrity] = useState(false);
   const [processingAuctions, setProcessingAuctions] = useState(false);
+  
+  // User dashboard tab state
+  const [activeTab, setActiveTab] = useState<string>('participated'); // 'participated', 'won', 'transactions'
     useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -280,14 +283,15 @@ const Profile: React.FC = () => {
               <div className="info-group">
                 <label>Phone Number</label>
                 <p>{editedUser.phoneNum}</p>
-              </div>
-                <div className="profile-actions">
-                <button 
-                  onClick={() => setIsEditing(true)}
-                  className="btn btn-primary"
-                >
-                  Edit Profile
-                </button>
+              </div>                <div className="profile-actions">
+                {user?.role !== 'admin' && (
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="btn btn-primary"
+                  >
+                    Edit Profile
+                  </button>
+                )}
                 {user?.role !== 'admin' && (
                   <button 
                     onClick={handleDeleteAccount}
@@ -301,7 +305,7 @@ const Profile: React.FC = () => {
                   className="btn btn-secondary"
                 >
                   {showPasswordChange ? 'Cancel' : 'Change Password'}
-                </button>              </div>
+                </button></div>
             </div>
           )}
         </div>
@@ -596,60 +600,93 @@ const Profile: React.FC = () => {
                 <p>Loading admin statistics...</p>
               </div>
             )}
-          </div>
-        ) : (
+          </div>        ) : (
           // User Dashboard
           <div className="user-dashboard">
-            <div className="user-auction-sections">
-              <div className="participated-auctions">
-                <h2>Auctions I Participated In</h2>
-                {participatedAuctions.length > 0 ? (
-                  <div className="auctions-list">
-                    {participatedAuctions.map(auction => (
-                      <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
-                        <h3>{auction.title}</h3>
-                        <div className="auction-item-details">
-                          <span className="auction-price">${auction.currentPrice}</span>
-                          <span className={`auction-status status-${auction.status}`}>
-                            {auction.status}
-                          </span>
+            {/* Dashboard Tabs */}
+            <div className="dashboard-tabs">
+              <button 
+                className={`tab-btn ${activeTab === 'participated' ? 'active' : ''}`}
+                onClick={() => setActiveTab('participated')}
+              >
+                <i className="fa fa-gavel"></i>
+                Participated Auctions
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === 'won' ? 'active' : ''}`}
+                onClick={() => setActiveTab('won')}
+              >
+                <i className="fa fa-trophy"></i>
+                Won Auctions
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === 'transactions' ? 'active' : ''}`}
+                onClick={() => setActiveTab('transactions')}
+              >
+                <i className="fa fa-credit-card"></i>
+                Transaction History
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="tab-content">
+              {activeTab === 'participated' && (
+                <div className="participated-auctions">
+                  <h2>Auctions I Participated In</h2>
+                  {participatedAuctions.length > 0 ? (
+                    <div className="auctions-list">
+                      {participatedAuctions.map(auction => (
+                        <div key={auction.auction_id} className="auction-item" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                          <h3>{auction.title}</h3>
+                          <div className="auction-item-details">
+                            <span className="auction-price">${auction.currentPrice}</span>
+                            <span className={`auction-status status-${auction.status}`}>
+                              {auction.status}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="no-auctions">
-                    <p>You haven't participated in any auctions yet.</p>
-                    <button onClick={() => navigate('/auctions')} className="btn btn-primary">
-                      Browse Auctions
-                    </button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="won-auctions">
-                <h2>Auctions I Won</h2>
-                {wonAuctions.length > 0 ? (
-                  <div className="auctions-list">
-                    {wonAuctions.map(auction => (
-                      <div key={auction.auction_id} className="auction-item won-auction" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
-                        <h3>{auction.title}</h3>
-                        <div className="auction-item-details">
-                          <span className="auction-price">${auction.currentPrice}</span>
-                          <span className="won-badge">WON</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-auctions">
+                      <p>You haven't participated in any auctions yet.</p>
+                      <button onClick={() => navigate('/auctions')} className="btn btn-primary">
+                        Browse Auctions
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'won' && (
+                <div className="won-auctions">
+                  <h2>Auctions I Won</h2>
+                  {wonAuctions.length > 0 ? (
+                    <div className="auctions-list">
+                      {wonAuctions.map(auction => (
+                        <div key={auction.auction_id} className="auction-item won-auction" onClick={() => navigate(`/auction/${auction.auction_id}`)}>
+                          <h3>{auction.title}</h3>
+                          <div className="auction-item-details">
+                            <span className="auction-price">${auction.currentPrice}</span>
+                            <span className="won-badge">WON</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="no-auctions">
-                    <p>You haven't won any auctions yet.</p>
-                    <button onClick={() => navigate('/auctions')} className="btn btn-primary">
-                      Browse Auctions
-                    </button>
-                  </div>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-auctions">
+                      <p>You haven't won any auctions yet.</p>
+                      <button onClick={() => navigate('/auctions')} className="btn btn-primary">
+                        Browse Auctions
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'transactions' && (
+                <TransactionHistory />
+              )}
             </div>
           </div>
         )}

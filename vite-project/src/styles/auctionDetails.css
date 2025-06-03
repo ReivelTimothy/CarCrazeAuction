@@ -454,6 +454,14 @@
   align-items: stretch;
 }
 
+/* New Bid Input Container */
+.bid-input-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: stretch;
+}
+
 .bid-input-group {
   position: relative;
   flex: 1;
@@ -489,60 +497,94 @@
   transform: translateY(-2px);
 }
 
-.bid-button {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+/* Quick Bid Section Styles */
+.quick-bid-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-300);
+}
+
+.quick-bid-label {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.bid-buttons-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.quick-bid-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
   color: var(--white);
   border: none;
   border-radius: var(--border-radius-md);
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  min-width: 110px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.quick-bid-button:hover {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: 140px;
-  margin-right: 7px;
 }
 
-.bid-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: var(--transition-normal);
+.quick-bid-button:active {
+  transform: translateY(0);
 }
 
-.bid-button:hover::before {
-  left: 100%;
-}
-
-.bid-button:hover {
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-xl);
-}
-
-.bid-button:active {
-  transform: translateY(-1px);
-}
-
-.bid-button:disabled {
-  background: linear-gradient(135deg, var(--gray) 0%, #9ca3af 100%);
+.quick-bid-button:disabled {
+  background: linear-gradient(135deg, var(--gray-400) 0%, var(--gray-500) 100%);
   cursor: not-allowed;
   transform: none;
   box-shadow: var(--shadow-sm);
 }
 
-.bid-button:disabled:hover {
+.bid-total {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  font-weight: 500;
+  display: block;
+  white-space: nowrap;
+}
+
+.bid-submit {
+  background: linear-gradient(135deg, var(--success-color, #10b981) 0%, var(--success-dark, #059669) 100%);
+  color: var(--white);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 140px;
+  padding: 1rem 1.5rem;
+}
+
+.bid-submit:hover {
+  background: linear-gradient(135deg, var(--success-dark, #059669) 0%, var(--success-color, #10b981) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.bid-submit:disabled {
+  background: linear-gradient(135deg, var(--gray-400) 0%, var(--gray-500) 100%);
+  cursor: not-allowed;
   transform: none;
-  box-shadow: var(--shadow-sm);
 }
 
 .bid-suggestion {
@@ -553,12 +595,46 @@
   padding: 0.5rem 0;
 }
 
-.auction-ended {
-  background-color: var(--light-bg);
-  padding: 1rem;
-  border-radius: 4px;
-  text-align: center;
-  margin-top: 1rem;
+/* Responsive Design for Bid Components */
+@media (max-width: 768px) {
+  .bid-input-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .bid-buttons-group {
+    justify-content: center;
+  }
+  
+  .quick-bid-button {
+    flex: 1;
+    min-width: 100px;
+  }
+  
+  .bid-input {
+    font-size: 1.1rem;
+  }
+  
+  .bid-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bid-buttons-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .quick-bid-button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .bid-input-container {
+    gap: 0.75rem;
+  }
 }
 
 .auction-details-tabs {

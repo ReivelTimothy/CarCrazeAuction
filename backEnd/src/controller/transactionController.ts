@@ -37,17 +37,106 @@ export const getTransactionById = async (req: any, res: any) => {
     }
 };
 
-// 3. get transaction by user_id
+// 3. get transaction by user_id (enhanced with auction and vehicle details)
 export const getTransactionByUserId = async (req: any, res: any) => {
     try {
         const userId = req.params.user_id;
-        const transactions = await Transaction.findAll({ where: { user_id: userId } });
-        if (!transactions) {
-            return res.status(404).json({ message: "Transactions not found" });
+        
+        // Import required models
+        const { User } = require('../../models/user');
+        const { Vehicle } = require('../../models/vehicle');
+        
+        const transactions = await Transaction.findAll({ 
+            where: { user_id: userId },
+            include: [
+                {
+                    model: User,
+                    attributes: ['username', 'user_id']
+                },
+                {
+                    model: Auction,
+                    required: true,
+                    include: [                        {
+                            model: Vehicle,
+                            required: true,
+                            attributes: ['brand', 'model', 'year', 'color', 'image']
+                        }
+                    ]
+                }
+            ],
+            order: [['transactionDate', 'DESC']] // Most recent first
+        });
+        
+        if (!transactions || transactions.length === 0) {
+            return res.status(200).json([]); // Return empty array instead of 404
         }
+        
         res.status(200).json(transactions);
     } catch (error) {
+        console.error("Error retrieving user transactions:", error);
         res.status(500).json({ message: "Error retrieving transactions", error });
+    }
+};
+
+// 3b. get current user's transaction history (using JWT)
+export const getCurrentUserTransactionHistory = async (req: any, res: any) => {
+    try {
+        const userId = req.user?.userId || req.body.userId;
+        
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+        
+        // Import required models
+        const { User } = require('../../models/user');
+        const { Vehicle } = require('../../models/vehicle');
+        
+        const transactions = await Transaction.findAll({ 
+            where: { user_id: userId },
+            include: [
+                {
+                    model: User,
+                    attributes: ['username', 'user_id']
+                },                {
+                    model: Auction,
+                    required: true,
+                    attributes: ['auction_id', 'title', 'description', 'startDate', 'endDate', 'status', 'image'],
+                    include: [                        {
+                            model: Vehicle,
+                            required: true,
+                            attributes: ['vehicle_id', 'brand', 'model', 'year', 'color']
+                        }
+                    ]
+                }
+            ],
+            order: [['transactionDate', 'DESC']] // Most recent first
+        });
+        
+        // Format the response with additional computed fields
+        const formattedTransactions = transactions.map(transaction => {
+            const plain = transaction.get({ plain: true });
+            return {
+                ...plain,
+                vehicleInfo: `${plain.auction.vehicle.year} ${plain.auction.vehicle.brand} ${plain.auction.vehicle.model}`,
+                statusColor: plain.status === 'Completed' ? 'success' : 'warning',
+                formattedDate: new Date(plain.transactionDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                formattedAmount: `$${plain.amount.toLocaleString()}`
+            };
+        });
+        
+        res.status(200).json({
+            count: formattedTransactions.length,
+            transactions: formattedTransactions
+        });
+    } catch (error) {
+        console.error("Error retrieving current user transaction history:", error);
+        res.status(500).json({ message: "Error retrieving transaction history", error });
     }
 };
 

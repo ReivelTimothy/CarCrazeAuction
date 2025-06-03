@@ -111,12 +111,11 @@ const AuctionDetails: React.FC = () => {
     
     return () => clearInterval(timer);
   }, [id, user]);
-  
-  useEffect(() => {
+    useEffect(() => {
     if (auction) {
       setTimeLeft(calculateTimeLeft(auction.endDate));
-      // Set initial bid amount suggestion
-      const suggestedBid = auction.currentPrice + (auction.currentPrice * 0.05);
+      // Set initial bid amount suggestion to minimum bid
+      const suggestedBid = calculateMinimumBid();
       setBidAmount(suggestedBid.toString());
     }
   }, [auction]);
@@ -144,7 +143,43 @@ const AuctionDetails: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };  // Modified handleBidSubmit to accept optional amount
+  };
+
+  // Helper to calculate minimum bid amount based on backend logic
+  const calculateMinimumBid = (): number => {
+    if (!auction) return 0;
+    // Backend logic: 5% of current price or at least 1,000,000, whichever is greater
+    const minIncrement = Math.max(auction.currentPrice * 0.05, 1000000);
+    return auction.currentPrice + minIncrement;
+  };
+
+  // Helper to get smart quick bid amounts
+  const getQuickBidAmounts = (): number[] => {
+    if (!auction) return [200000, 500000, 1000000];
+    
+    const minBid = calculateMinimumBid();
+    const currentPrice = auction.currentPrice;
+    
+    // Generate smart increments that make sense for the current price
+    const baseIncrement = Math.max(auction.currentPrice * 0.05, 1000000);
+    
+    return [
+      minBid, // Minimum allowed bid
+      currentPrice + baseIncrement * 2, // 2x minimum increment
+      currentPrice + baseIncrement * 5, // 5x minimum increment
+    ];
+  };
+
+  // Helper to format currency for display
+  const formatCurrency = (amount: number): string => {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(0)}K`;
+    }
+    return amount.toLocaleString();
+  };
+  // Modified handleBidSubmit to accept optional amount
   const handleBidSubmit = async (e: React.FormEvent | null, customAmount?: number) => {
     if (e) e.preventDefault();
     const amountToBid = customAmount !== undefined ? customAmount : parseFloat(bidAmount);
@@ -164,19 +199,30 @@ const AuctionDetails: React.FC = () => {
     
     // Check if auction time has ended
     if (calculateTimeLeft(auction.endDate) === "Auction ended") {
-      // Try to update the auction status first
       await checkAuctionStatusAndWinner();
-      
       setBidError('This auction has ended.');
       return;
     }
-      console.log(`Bid placed: ${amountToBid} for auction ${auction.auction_id}`);
+
+    // Validate minimum bid amount
+    const minBid = calculateMinimumBid();
+    if (amountToBid < minBid) {
+      setBidError(`Your bid must be at least $${minBid.toLocaleString()}`);
+      return;
+    }
+
+    // Clear any previous errors
+    setBidError(null);
+    
+    console.log(`Bid placed: ${amountToBid} for auction ${auction.auction_id}`);
     try {
       setLoading(true);
       await placeBid(auction.auction_id, amountToBid, user.user_id);
+      
       // Update auction with new bid price
       const updatedAuction = await getAuctionById(id!);
       setAuction(updatedAuction);
+      
       // Get new highest bid
       try {
         const newHighestBid = await getHighestBid(id!);
@@ -186,7 +232,9 @@ const AuctionDetails: React.FC = () => {
       } catch (bidErr) {
         console.log('Failed to get updated bid information');
       }
+      
       setBidSuccess('Your bid has been placed successfully!');
+      setBidAmount(''); // Clear the input
       setTimeout(() => setBidSuccess(null), 3000);
     } catch (err: any) {
       console.error('Error placing bid:', err);
@@ -221,9 +269,8 @@ const AuctionDetails: React.FC = () => {
     } finally {
       setStatusUpdateLoading(false);
     }
-  };
-  // Helper to increase bid and submit
-  const handleQuickBid = async (increment: number) => {
+  };  // Helper to increase bid and submit
+  const handleQuickBid = async (bidAmount: number) => {
     if (!auction || !user) return;
     
     // Prevent admins from placing quick bids
@@ -232,11 +279,15 @@ const AuctionDetails: React.FC = () => {
       return;
     }
     
-    // Always base quick bid on the current auction price
-    const newBid = auction.currentPrice + increment;
-    setBidAmount(newBid.toString());
-    console.log("Quick bid amount: ", newBid);
-    handleBidSubmit(null, newBid);
+    const minBid = calculateMinimumBid();
+    if (bidAmount < minBid) {
+      setBidError(`Minimum bid is $${minBid.toLocaleString()}`);
+      return;
+    }
+    
+    setBidAmount(bidAmount.toString());
+    console.log("Quick bid amount: ", bidAmount);
+    handleBidSubmit(null, bidAmount);
   };
 
   if (loading && !auction) {
@@ -336,42 +387,59 @@ const AuctionDetails: React.FC = () => {
               <div className="meta-item">
                 <span className="meta-label">Ending:</span>
                 <span className="meta-value">{formatDate(auction.endDate)}</span>
-              </div>            </div>
-            {/* Only show bid section for non-admin users */}
+              </div>            </div>            {/* Only show bid section for non-admin users */}
             {isAuctionActive && user && user.role !== 'admin' && (
               <div className="bid-section">
                 {bidError && <div className="bid-error">{bidError}</div>}
                 {bidSuccess && <div className="bid-success">{bidSuccess}</div>}
+                
+                {/* Manual Bid Form */}
                 <form onSubmit={handleBidSubmit} className="bid-form">
-                  <div className="bid-buttons-group">
+                  <div className="bid-input-container">
+                    <div className="bid-input-group">
+                      <span className="currency-symbol">$</span>
+                      <input
+                        type="number"
+                        value={bidAmount}
+                        onChange={(e) => setBidAmount(e.target.value)}
+                        placeholder={`Min: ${calculateMinimumBid().toLocaleString()}`}
+                        min={calculateMinimumBid()}
+                        step="1000"
+                        className="bid-input"
+                        disabled={!isAuctionActive || loading}
+                      />
+                    </div>
                     <button
-                      type="button"
-                      className="bid-button"
-                      disabled={!isAuctionActive || loading}
-                      onClick={() => handleQuickBid(200000)}
+                      type="submit"
+                      className="bid-button bid-submit"
+                      disabled={!isAuctionActive || loading || !bidAmount || parseFloat(bidAmount) < calculateMinimumBid()}
                     >
-                      Bid 200.000
-                    </button>
-                    <button
-                      type="button"
-                      className="bid-button"
-                      disabled={!isAuctionActive || loading}
-                      onClick={() => handleQuickBid(500000)}
-                    >
-                      Bid 500.000
-                    </button>
-                    <button
-                      type="button"
-                      className="bid-button"
-                      disabled={!isAuctionActive || loading}
-                      onClick={() => handleQuickBid(1000000)}
-                    >
-                      Bid 1.000.000
+                      {loading ? 'Placing...' : 'Place Bid'}
                     </button>
                   </div>
                 </form>
+
+                {/* Quick Bid Buttons */}
+                <div className="quick-bid-section">
+                  <p className="quick-bid-label">Quick Bid Options:</p>
+                  <div className="bid-buttons-group">
+                    {getQuickBidAmounts().map((amount, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="bid-button quick-bid-button"
+                        disabled={!isAuctionActive || loading}
+                        onClick={() => handleQuickBid(amount)}
+                      >
+                        +{formatCurrency(amount - auction.currentPrice)} 
+                        <span className="bid-total">(${formatCurrency(amount)})</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
                 <p className="bid-suggestion">
-                  Suggested bid: ${(auction.currentPrice * 1.05).toFixed(2)}
+                  Minimum bid: ${calculateMinimumBid().toLocaleString()}
                 </p>
               </div>
             )}

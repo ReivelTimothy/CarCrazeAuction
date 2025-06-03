@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getTransactionById, updateTransactionStatus } from '../services/transactionService';
+import { getTransactionById } from '../services/transactionService';
 import { getAuctionById } from '../services/auctionService';
 import { useAuth } from '../context/AuthContext';
 import '../styles/transaction.css';
@@ -51,7 +51,6 @@ const TransactionDetails: React.FC = () => {
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPaymentMethod(e.target.value);
   };
-
   const handleSubmitPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -60,11 +59,30 @@ const TransactionDetails: React.FC = () => {
     try {
       setPaymentProcessing(true);
       
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Collect payment details based on selected method
+      const paymentDetails: any = {
+        paymentMethod
+      };
       
-      // Update transaction status
-      await updateTransactionStatus(transaction.transaction_id, 'Completed');
+      if (paymentMethod === 'credit_card') {
+        const cardNumber = (document.getElementById('card_number') as HTMLInputElement)?.value;
+        const expiryDate = (document.getElementById('expiry_date') as HTMLInputElement)?.value;
+        const cvv = (document.getElementById('cvv') as HTMLInputElement)?.value;
+        
+        if (!cardNumber || !expiryDate || !cvv) {
+          setError('Please fill in all credit card details');
+          setPaymentProcessing(false);
+          return;
+        }
+        
+        paymentDetails.cardNumber = cardNumber;
+        paymentDetails.expiryDate = expiryDate;
+        paymentDetails.cvv = cvv;
+      }
+      
+      // Process payment using the new endpoint
+      const { processPayment } = await import('../services/transactionService');
+      await processPayment(transaction.transaction_id, paymentDetails);
       
       // Refresh transaction data
       const updatedTransaction = await getTransactionById(id!);
@@ -77,6 +95,35 @@ const TransactionDetails: React.FC = () => {
     } finally {
       setPaymentProcessing(false);
     }
+  };
+
+  // Add card number formatting function
+  const formatCardNumber = (value: string) => {
+    // Remove all spaces and non-numeric characters
+    const cleaned = value.replace(/\D/g, '');
+    // Add spaces every 4 digits
+    const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
+    return formatted;
+  };
+
+  const formatExpiryDate = (value: string) => {
+    // Remove all non-numeric characters
+    const cleaned = value.replace(/\D/g, '');
+    // Add slash after 2 digits
+    if (cleaned.length >= 2) {
+      return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
+    }
+    return cleaned;
+  };
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCardNumber(e.target.value);
+    e.target.value = formatted;
+  };
+
+  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatExpiryDate(e.target.value);
+    e.target.value = formatted;
   };
 
   if (loading) {
@@ -189,14 +236,17 @@ const TransactionDetails: React.FC = () => {
                 </div>
                 
                 {paymentMethod === 'credit_card' && (
-                  <div className="payment-details credit-card">
-                    <div className="form-group">
+                  <div className="payment-details credit-card">                    <div className="form-group">
                       <label htmlFor="card_number">Card Number</label>
                       <input
                         type="text"
                         id="card_number"
                         placeholder="1234 5678 9012 3456"
                         maxLength={19}
+                        required
+                        pattern="[0-9\s]*"
+                        title="Please enter a valid card number"
+                        onChange={handleCardNumberChange}
                       />
                     </div>
                     
@@ -208,6 +258,10 @@ const TransactionDetails: React.FC = () => {
                           id="expiry_date"
                           placeholder="MM/YY"
                           maxLength={5}
+                          required
+                          pattern="[0-9]{2}/[0-9]{2}"
+                          title="Please enter date in MM/YY format"
+                          onChange={handleExpiryDateChange}
                         />
                       </div>
                       
@@ -218,6 +272,9 @@ const TransactionDetails: React.FC = () => {
                           id="cvv"
                           placeholder="123"
                           maxLength={3}
+                          required
+                          pattern="[0-9]{3,4}"
+                          title="Please enter a valid CVV"
                         />
                       </div>
                     </div>
