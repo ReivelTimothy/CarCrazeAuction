@@ -14,7 +14,7 @@ interface AuctionWithVehicle extends Auction {
 const Home: React.FC = () => {
     const [auctions, setAuctions] = useState<AuctionWithVehicle[]>([]);    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-    // const { user } = useAuth(); // Currently unused
+    const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
     
     const categoryOptions = [
@@ -69,18 +69,7 @@ const Home: React.FC = () => {
                 setIsLoading(false);
             }
         };
-        fetchAuctions();
-    }, []);    const formatDate = (dateString: string | Date) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric'
-        });
-    };
-
-    // Function currently unused but may be needed for future features
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
+        fetchAuctions();    }, []);    
     const calculateTimeLeft = (endDate: string | Date) => {
         const difference = new Date(endDate).getTime() - new Date().getTime();
         
@@ -92,12 +81,24 @@ const Home: React.FC = () => {
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         
         return `${days} days ${hours} hours left`;
-    };    
-    return (
+    };      return (
         <div className="home-container">
             <div className="home-header">
                 <h1>Car Craze Auction</h1>
                 <p>Discover and bid on premium vehicles</p>
+                {!isAuthenticated && (
+                    <div className="guest-welcome">
+                        <p>Welcome, guest! Browse our auctions and <strong>login to start bidding</strong>.</p>
+                        <div className="guest-actions">
+                            <button className="btn btn-primary" onClick={() => navigate('/login')}>
+                                Login
+                            </button>
+                            <button className="btn btn-secondary" onClick={() => navigate('/register')}>
+                                Register
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Dropdown Sort/Filter by Category, Mileage, and Search */}
@@ -200,9 +201,13 @@ const Home: React.FC = () => {
                                         </div>
                                         <div className="auction-time">
                                             <span>Time Left</span>
-                                            <strong>{calculateTimeLeft(auction.endDate)}</strong>
-                                        </div>
+                                            <strong>{calculateTimeLeft(auction.endDate)}</strong>                                        </div>
                                     </div>
+                                    {!isAuthenticated && (
+                                        <div className="guest-overlay">
+                                            <span>Login to bid on this auction</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

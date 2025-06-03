@@ -5,7 +5,7 @@ import { getVehicleById } from '../services/vehicleService';
 import { getHighestBid, placeBid } from '../services/bidService';
 import { checkUserIsWinnerAndGetTransaction } from '../services/transactionService';
 import { useAuth } from '../context/AuthContext';
-import type { Auction, Vehicle, Bid, WinnerCheckResponse, AuctionEndCheckResponse } from '../types/types';
+import type { Auction, Vehicle, Bid } from '../types/types';
 import '../styles/auctionDetails.css';
 
 const AuctionDetails: React.FC = () => {
@@ -19,10 +19,8 @@ const AuctionDetails: React.FC = () => {
   const [bidError, setBidError] = useState<string | null>(null);
   const [bidSuccess, setBidSuccess] = useState<string | null>(null);  const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
   const [statusUpdateSuccess, setStatusUpdateSuccess] = useState<string | null>(null);
-  const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
-  const [isAuctionClosed, setIsAuctionClosed] = useState<boolean>(false);
+  const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);  const [isAuctionClosed, setIsAuctionClosed] = useState<boolean>(false);
   const [isUserWinner, setIsUserWinner] = useState<boolean>(false);
-  const [winnerMessage, setWinnerMessage] = useState<string | null>(null);
   const [transactionDetails, setTransactionDetails] = useState<any>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -38,9 +36,7 @@ const AuctionDetails: React.FC = () => {
         
         // Check if current user is the winner
         const winnerCheck = await checkUserIsWinnerAndGetTransaction(id);
-        
-        setIsUserWinner(winnerCheck.isWinner);
-        setWinnerMessage(winnerCheck.message);
+          setIsUserWinner(winnerCheck.isWinner);
         
         if (winnerCheck.isWinner && winnerCheck.transaction) {
           setTransactionDetails(winnerCheck.transaction);
