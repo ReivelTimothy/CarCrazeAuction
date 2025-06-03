@@ -24,18 +24,30 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) 
   return isAuthenticated ? element : <Navigate to="/login" replace />;
 };
 
+// Guest-allowed Route component (shows content but may have limited functionality)
+const GuestAllowedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+  const { loading } = useAuth();
+  
+  if (loading) {
+    return <div className="loading-container">Loading...</div>;
+  }
+  
+  return element;
+};
+
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
   
   return (
     <>
-      {isAuthenticated && <Navbar />}      <div className={`main-container ${isAuthenticated ? 'with-navbar' : ''}`}>
+      <Navbar />
+      <div className={`main-container with-navbar`}>
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/home" />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
-          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />          
-          <Route path="/auction/:id" element={<ProtectedRoute element={<AuctionDetails />} />} />
+          <Route path="/home" element={<GuestAllowedRoute element={<Home />} />} />          
+          <Route path="/auction/:id" element={<GuestAllowedRoute element={<AuctionDetails />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
           <Route path="/create-auction" element={<ProtectedRoute element={<CreateAuction />} />} />
           <Route path="/transaction/:id" element={<ProtectedRoute element={<TransactionDetails />} />} />

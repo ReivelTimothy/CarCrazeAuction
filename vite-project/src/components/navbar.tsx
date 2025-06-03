@@ -25,8 +25,8 @@ const Navbar: React.FC = () => {
         <div className="menu-icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           <i className={isMenuOpen ? 'fas fa-times' : 'fas fa-bars'} />
         </div>
-        
-        <ul className={isMenuOpen ? 'nav-menu active' : 'nav-menu'}>          <li className="nav-item">
+          <ul className={isMenuOpen ? 'nav-menu active' : 'nav-menu'}>          
+          <li className="nav-item">
             <NavLink to="/home" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Home
             </NavLink>
@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
               </NavLink>
             </li>
           )}
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <>
               <li className="nav-item">
                 <NavLink to="/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
@@ -55,6 +55,19 @@ const Navbar: React.FC = () => {
                   <span className="username">{user.username}</span>
                 </li>
               )}
+            </>
+          ) : (
+            <>
+              <li className="nav-item">
+                <NavLink to="/login" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  Login
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink to="/register" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  Register
+                </NavLink>
+              </li>
             </>
           )}
         </ul>
