@@ -16,6 +16,28 @@ const Home: React.FC = () => {
     const [error, setError] = useState("");
     // const { user } = useAuth(); // Currently unused
     const navigate = useNavigate();
+    
+    const categoryOptions = [
+        "All",
+        "Sedan",
+        "SUV",
+        "Hatchback",
+        "Truck",
+        "Coupe",
+        "Convertible",
+        "Van",
+        "Wagon"
+    ];
+
+    const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
+    const mileageSortOptions = [
+        { label: "Default", value: "default" },
+        { label: "Lowest to Highest", value: "asc" },
+        { label: "Highest to Lowest", value: "desc" }
+    ];
+    const [mileageSort, setMileageSort] = useState<string>("default");
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
 
     useEffect(() => {
         const fetchAuctions = async () => {
@@ -77,7 +99,46 @@ const Home: React.FC = () => {
                 <h1>Car Craze Auction</h1>
                 <p>Discover and bid on premium vehicles</p>
             </div>
-            
+
+            {/* Dropdown Sort/Filter by Category, Mileage, and Search */}
+            <div style={{ marginBottom: 24, display: "flex", gap: 24, alignItems: "center" }}>
+                <div>
+                    <label htmlFor="category-select" style={{ marginRight: 8, fontWeight: 500 }}>Sort by Category:</label>
+                    <select
+                        id="category-select"
+                        value={selectedCategory}
+                        onChange={e => setSelectedCategory(e.target.value)}
+                        style={{ padding: 6, borderRadius: 4 }}
+                    >
+                        {categoryOptions.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="mileage-sort" style={{ marginRight: 8, fontWeight: 500 }}>Sort by Mileage:</label>
+                    <select
+                        id="mileage-sort"
+                        value={mileageSort}
+                        onChange={e => setMileageSort(e.target.value)}
+                        style={{ padding: 6, borderRadius: 4 }}
+                    >
+                        {mileageSortOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Search by title..."
+                        value={searchKeyword}
+                        onChange={e => setSearchKeyword(e.target.value)}
+                        style={{ padding: 6, borderRadius: 4, minWidth: 200 }}
+                    />
+                </div>
+            </div>
+
             {isLoading ? (
                 <div className="loading-wrapper">
                     <div className="loading-spinner"></div>
@@ -92,42 +153,59 @@ const Home: React.FC = () => {
                 </div>
             ) : (
                 <div className="auctions-grid">
-                    {auctions.filter(auction => auction.status !== "pending" && new Date(auction.endDate).getTime() > Date.now()).map((auction) => (
-                        <div 
-                            className="auction-card" 
-                            key={auction.auction_id}
-                            onClick={() => navigate(`/auction/${auction.auction_id}`)}
-                        >
-                            <div className="auction-image">
-                                {auction.image ? (
-                                    <img src={`http://localhost:3000/uploads/${auction.image}`} alt={auction.title} />
-                                ) : (
-                                    <div className="placeholder-image">
-                                        <span>{auction.vehicle?.brand || 'Car'}</span>
-                                    </div>
-                                )}
-                                <div className="auction-status">{auction.status}</div>
-                            </div>
-                            <div className="auction-details">
-                                <h3>{auction.title}</h3>
-                                <p className="auction-vehicle">
-                                    {auction.vehicle ? 
-                                        `${auction.vehicle.year} ${auction.vehicle.brand} ${auction.vehicle.model}` : 
-                                        'Vehicle details unavailable'}
-                                </p>
-                                <div className="auction-meta">
-                                    <div className="auction-price">
-                                        <span>Current Bid</span>
-                                        <strong>${auction.currentPrice.toLocaleString()}</strong>
-                                    </div>
-                                    <div className="auction-time">
-                                        <span>Time Left</span>
-                                        <strong>{calculateTimeLeft(auction.endDate)}</strong>
+                    {auctions
+                        .filter(auction => auction.status !== "pending" && new Date(auction.endDate).getTime() > Date.now())
+                        .filter(auction => selectedCategory === "All" || auction.category === selectedCategory)
+                        .filter(auction => (auction.vehicle?.mileage ?? 0) > 0)
+                        .filter(auction => 
+                            auction.title.toLowerCase().includes(searchKeyword.toLowerCase())
+                        )
+                        .sort((a, b) => {
+                            if (mileageSort === "asc") {
+                                return (a.vehicle?.mileage ?? 0) - (b.vehicle?.mileage ?? 0);
+                            }
+                            if (mileageSort === "desc") {
+                                return (b.vehicle?.mileage ?? 0) - (a.vehicle?.mileage ?? 0);
+                            }
+                            // default: no sorting, just filter >0
+                            return 0;
+                        })
+                        .map((auction) => (
+                            <div 
+                                className="auction-card" 
+                                key={auction.auction_id}
+                                onClick={() => navigate(`/auction/${auction.auction_id}`)}
+                            >
+                                <div className="auction-image">
+                                    {auction.image ? (
+                                        <img src={`http://localhost:3000/uploads/${auction.image}`} alt={auction.title} />
+                                    ) : (
+                                        <div className="placeholder-image">
+                                            <span>{auction.vehicle?.brand || 'Car'}</span>
+                                        </div>
+                                    )}
+                                    <div className="auction-status">{auction.status}</div>
+                                </div>
+                                <div className="auction-details">
+                                    <h3>{auction.title}</h3>
+                                    <p className="auction-vehicle">
+                                        {auction.vehicle ? 
+                                            `${auction.vehicle.year} ${auction.vehicle.brand} ${auction.vehicle.model}` : 
+                                            'Vehicle details unavailable'}
+                                    </p>
+                                    <div className="auction-meta">
+                                        <div className="auction-price">
+                                            <span>Current Bid</span>
+                                            <strong>${auction.currentPrice.toLocaleString()}</strong>
+                                        </div>
+                                        <div className="auction-time">
+                                            <span>Time Left</span>
+                                            <strong>{calculateTimeLeft(auction.endDate)}</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                 </div>
             )}
         </div>

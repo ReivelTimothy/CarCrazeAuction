@@ -255,7 +255,333 @@ async function seed() {
             vehicle_id: vehicle6.vehicle_id,
         });        
 
-        // Create comprehensive bid data for testing
+        // Tambahan kendaraan dan auction untuk kategori lain
+        const vehicleSedan = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Sedan',
+            brand: 'Toyota',
+            model: 'Camry',
+            year: 2021,
+            color: 'Grey',
+            mileage: 10000,
+            transmissionType: 'Automatic',
+            fuelType: 'Gasoline',
+            condition: 'Excellent',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Toyota Camry 2021 - Executive Sedan',
+            description: 'Luxury sedan, low mileage, like new.',
+            startingPrice: 350_000_000,
+            currentPrice: 355_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Sedan",
+            image: 'camry2021.jpg',
+            vehicle_id: vehicleSedan.vehicle_id,
+        });
+
+        const vehicleSUV = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'SUV',
+            brand: 'Hyundai',
+            model: 'Santa Fe',
+            year: 2022,
+            color: 'White',
+            mileage: 5000,
+            transmissionType: 'Automatic',
+            fuelType: 'Diesel',
+            condition: 'Excellent',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Hyundai Santa Fe 2022 - Modern SUV',
+            description: 'SUV terbaru, fitur lengkap, siap pakai.',
+            startingPrice: 500_000_000,
+            currentPrice: 505_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "SUV",
+            image: 'santafe2022.jpg',
+            vehicle_id: vehicleSUV.vehicle_id,
+        });
+
+        const vehicleHatchback = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Hatchback',
+            brand: 'Honda',
+            model: 'Jazz',
+            year: 2020,
+            color: 'Yellow',
+            mileage: 12000,
+            transmissionType: 'Automatic',
+            fuelType: 'Gasoline',
+            condition: 'Good',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Honda Jazz 2020 - Sporty Hatchback',
+            description: 'Irit, lincah, cocok untuk anak muda.',
+            startingPrice: 200_000_000,
+            currentPrice: 205_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Hatchback",
+            image: 'jazz2020.jpg',
+            vehicle_id: vehicleHatchback.vehicle_id,
+        });
+
+        const vehicleTruck = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Truck',
+            brand: 'Isuzu',
+            model: 'Elf',
+            year: 2019,
+            color: 'Blue',
+            mileage: 30000,
+            transmissionType: 'Manual',
+            fuelType: 'Diesel',
+            condition: 'Fair',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Isuzu Elf 2019 - Box Truck',
+            description: 'Cocok untuk usaha, mesin bandel.',
+            startingPrice: 180_000_000,
+            currentPrice: 180_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Truck",
+            image: 'elf2019.jpg',
+            vehicle_id: vehicleTruck.vehicle_id,
+        });
+
+        const vehicleCoupe = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Coupe',
+            brand: 'Mercedes-Benz',
+            model: 'C-Class Coupe',
+            year: 2021,
+            color: 'Red',
+            mileage: 8000,
+            transmissionType: 'Automatic',
+            fuelType: 'Gasoline',
+            condition: 'Excellent',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Mercedes-Benz C-Class Coupe 2021',
+            description: 'Coupe mewah, sporty dan elegan.',
+            startingPrice: 700_000_000,
+            currentPrice: 710_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Coupe",
+            image: 'cclasscoupe2021.jpg',
+            vehicle_id: vehicleCoupe.vehicle_id,
+        });
+
+        const vehicleConvertible = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Convertible',
+            brand: 'Mazda',
+            model: 'MX-5',
+            year: 2020,
+            color: 'Silver',
+            mileage: 9000,
+            transmissionType: 'Manual',
+            fuelType: 'Gasoline',
+            condition: 'Excellent',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Mazda MX-5 2020 - Convertible',
+            description: 'Mobil atap terbuka, fun to drive!',
+            startingPrice: 600_000_000,
+            currentPrice: 605_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Convertible",
+            image: 'mx52020.jpg',
+            vehicle_id: vehicleConvertible.vehicle_id,
+        });
+
+        const vehicleVan = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Van',
+            brand: 'Toyota',
+            model: 'HiAce',
+            year: 2018,
+            color: 'White',
+            mileage: 40000,
+            transmissionType: 'Manual',
+            fuelType: 'Diesel',
+            condition: 'Good',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Toyota HiAce 2018 - Family Van',
+            description: 'Muatan banyak, cocok untuk travel.',
+            startingPrice: 350_000_000,
+            currentPrice: 355_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Van",
+            image: 'hiace2018.jpg',
+            vehicle_id: vehicleVan.vehicle_id,
+        });
+
+        const vehicleWagon = await Vehicle.create({
+            vehicle_id: uuidv4(),
+            type: 'Wagon',
+            brand: 'Subaru',
+            model: 'Outback',
+            year: 2021,
+            color: 'Green',
+            mileage: 15000,
+            transmissionType: 'Automatic',
+            fuelType: 'Gasoline',
+            condition: 'Excellent',
+            documents: 'BPKB, STNK',
+        });
+        await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Subaru Outback 2021 - Wagon',
+            description: 'Wagon tangguh, nyaman untuk keluarga.',
+            startingPrice: 500_000_000,
+            currentPrice: 505_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Wagon",
+            image: 'outback2021.jpg',
+            vehicle_id: vehicleWagon.vehicle_id,
+        });        // Create auctions with different statuses for testing admin functionality
+        const auction7 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Toyota Camry 2021 - Executive Sedan',
+            description: 'Luxury sedan, low mileage, like new.',
+            startingPrice: 350_000_000,
+            currentPrice: 355_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Sedan",
+            image: 'camry2021.jpg',
+            vehicle_id: vehicleSedan.vehicle_id,
+        });
+
+        const auction8 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Hyundai Santa Fe 2022 - Modern SUV',
+            description: 'SUV terbaru, fitur lengkap, siap pakai.',
+            startingPrice: 500_000_000,
+            currentPrice: 505_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "SUV",
+            image: 'santafe2022.jpg',
+            vehicle_id: vehicleSUV.vehicle_id,
+        });
+
+        const auction9 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Honda Jazz 2020 - Sporty Hatchback',
+            description: 'Irit, lincah, cocok untuk anak muda.',
+            startingPrice: 200_000_000,
+            currentPrice: 205_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Hatchback",
+            image: 'jazz2020.jpg',
+            vehicle_id: vehicleHatchback.vehicle_id,
+        });
+
+        const auction10 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Isuzu Elf 2019 - Box Truck',
+            description: 'Cocok untuk usaha, mesin bandel.',
+            startingPrice: 180_000_000,
+            currentPrice: 180_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Truck",
+            image: 'elf2019.jpg',
+            vehicle_id: vehicleTruck.vehicle_id,
+        });
+
+        const auction11 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Mercedes-Benz C-Class Coupe 2021',
+            description: 'Coupe mewah, sporty dan elegan.',
+            startingPrice: 700_000_000,
+            currentPrice: 710_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Coupe",
+            image: 'cclasscoupe2021.jpg',
+            vehicle_id: vehicleCoupe.vehicle_id,
+        });
+
+        const auction12 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Mazda MX-5 2020 - Convertible',
+            description: 'Mobil atap terbuka, fun to drive!',
+            startingPrice: 600_000_000,
+            currentPrice: 605_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Convertible",
+            image: 'mx52020.jpg',
+            vehicle_id: vehicleConvertible.vehicle_id,
+        });
+
+        const auction13 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Toyota HiAce 2018 - Family Van',
+            description: 'Muatan banyak, cocok untuk travel.',
+            startingPrice: 350_000_000,
+            currentPrice: 355_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Van",
+            image: 'hiace2018.jpg',
+            vehicle_id: vehicleVan.vehicle_id,
+        });
+
+        const auction14 = await Auction.create({
+            auction_id: uuidv4(),
+            title: 'Subaru Outback 2021 - Wagon',
+            description: 'Wagon tangguh, nyaman untuk keluarga.',
+            startingPrice: 500_000_000,
+            currentPrice: 505_000_000,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 86400000 * 2),
+            status: "OPEN",
+            category: "Wagon",
+            image: 'outback2021.jpg',
+            vehicle_id: vehicleWagon.vehicle_id,
+        });        // Create comprehensive bid data for testing
         await Bid.bulkCreate([
             // Bids for Toyota Avanza auction
             {
@@ -376,7 +702,7 @@ async function seed() {
         console.log('   - alice@mail.com / alice123');
         console.log('   - bob@mail.com / bob456');
         console.log('⚙️  Admin Accounts:');
-        console.log('   - admin1@mail.com / adminpass');
+        console.log('   - admin1@mail.com / adminpass');    
         console.log('   - superadmin@mail.com / superpass123');
         console.log('\n🔒 Note: All passwords are properly hashed using bcrypt for security');
         console.log('\n🎯 Test Scenarios Available:');
