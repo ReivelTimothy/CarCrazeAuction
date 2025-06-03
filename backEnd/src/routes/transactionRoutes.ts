@@ -1,5 +1,6 @@
 import express from 'express';
-import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions } from '../controller/transactionController';
+import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions, processPayment } from '../controller/transactionController';port express from 'express';
+import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction, cleanupInvalidTransactions, processPayment } from '../controller/transactionController';
 import { authenticateJWT } from '../middleware/auth';
 const transactionRoutes = express.Router();
 
@@ -21,4 +22,7 @@ transactionRoutes.get('/:vehicle_id/getTransactionByVehicleId', authenticateJWT,
 transactionRoutes.get('/auction/:auction_id/check-winner', authenticateJWT, checkUserIsWinnerAndGetTransaction);
 // 9. Admin cleanup for invalid transactions
 transactionRoutes.post('/admin/cleanup-invalid-transactions', authenticateJWT, cleanupInvalidTransactions);
+// 10. Process payment for a transaction
+transactionRoutes.post('/:id/process-payment', authenticateJWT, processPayment);
+
 export default transactionRoutes;

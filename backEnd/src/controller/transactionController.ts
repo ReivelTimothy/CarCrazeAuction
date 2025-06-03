@@ -284,3 +284,78 @@ export const checkUserIsWinnerAndGetTransaction = async (req: any, res: any) => 
         res.status(500).json({ message: "Error checking winner status", error });
     }
 };
+
+// 10. Process payment for a transaction
+export const processPayment = async (req: any, res: any) => {
+    try {
+        const transactionId = req.params.id;
+        const { paymentMethod, cardNumber, expiryDate, cvv, bankAccount } = req.body;
+        const userId = req.user?.userId || req.body.userId;
+
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        // Find the transaction
+        const transaction = await Transaction.findOne({ 
+            where: { transaction_id: transactionId } 
+        });
+
+        if (!transaction) {
+            return res.status(404).json({ message: "Transaction not found" });
+        }
+
+        // Verify the user owns this transaction
+        if (transaction.user_id !== userId) {
+            return res.status(403).json({ message: "Unauthorized to process this payment" });
+        }
+
+        // Simulate payment processing (in production, integrate with real payment gateway)
+        const isPaymentSuccessful = await simulatePaymentProcessing(paymentMethod, {
+            cardNumber,
+            expiryDate,
+            cvv,
+            bankAccount,
+            amount: transaction.amount
+        });
+
+        if (isPaymentSuccessful) {
+            // Update transaction with payment method and completed status
+            transaction.paymentMethod = paymentMethod;
+            transaction.status = 'Completed';
+            await transaction.save();
+
+            res.status(200).json({
+                message: "Payment processed successfully",
+                transaction: transaction
+            });
+        } else {
+            res.status(400).json({ message: "Payment processing failed" });
+        }
+    } catch (error) {
+        console.error("Error processing payment:", error);
+        res.status(500).json({ message: "Error processing payment", error });
+    }
+};
+
+// Helper function to simulate payment processing
+const simulatePaymentProcessing = async (paymentMethod: string, paymentDetails: any): Promise<boolean> => {
+    // Simulate processing delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // In production, this would integrate with actual payment gateways
+    // For now, we'll simulate different success rates based on payment method
+    switch (paymentMethod) {
+        case 'credit_card':
+            // Simulate credit card validation
+            return paymentDetails.cardNumber && paymentDetails.expiryDate && paymentDetails.cvv;
+        case 'bank_transfer':
+            // Bank transfer is always successful for simulation
+            return true;
+        case 'paypal':
+            // PayPal simulation
+            return true;
+        default:
+            return false;
+    }
+};
