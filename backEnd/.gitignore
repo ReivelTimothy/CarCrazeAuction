@@ -1,7 +1,6 @@
 # Ignore folder node_modules
 node_modules/
 config/
-uploads/
 
 # Ignore Python virtual environment
 venv/
