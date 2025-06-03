@@ -19,9 +19,16 @@ export const getHighestBid = async (req: any, res: any) => {
             return res.status(400).json({ message: "auction_id parameter is required" });
         }
 
+        // Import the User model
+        const { User } = require('../../models/user');
+
         const highestBid = await Bid.findOne({
             where: { auction_id },
             order: [['amount', 'DESC']],
+            include: [{
+                model: User,
+                attributes: ['username', 'user_id']  // Only include needed fields
+            }]
         });
 
         if (!highestBid) {
@@ -71,6 +78,57 @@ export const placeBid = async (req: AuthRequest, res: any) => {
             return res.status(400).json({ message: "Missing required fields: auction_id, amount, or user not authenticated" });
         }
         
+        // Get auction details first
+        const auction = await Auction.findOne({ where: { auction_id } });
+        
+        if (!auction) {
+            return res.status(404).json({ message: "Auction not found" });
+        }
+        
+        // Check if auction is already closed
+        if (auction.status === 'closed') {
+            return res.status(400).json({ message: "This auction is already closed. No more bids can be placed." });
+        }
+        
+        // Check if auction end time has passed
+        const now = new Date();
+        const endDate = new Date(auction.endDate);
+          if (now > endDate) {
+            // Auction has ended, close it and determine winner
+            auction.status = 'closed';
+            
+            // Find the highest bid
+            const highestBid = await Bid.findOne({
+                where: { auction_id },
+                order: [['amount', 'DESC']]
+            });
+            
+            if (highestBid) {
+                // Update auction's current price to match the highest bid
+                auction.currentPrice = highestBid.amount;
+                await auction.save();
+                
+                // Create a transaction record for the winner
+                await Transaction.create({
+                    auction_id,
+                    user_id: highestBid.user_id,
+                    amount: highestBid.amount,
+                    transactionDate: new Date(),
+                    status: 'Pending',
+                    paymentMethod: 'Not Selected'
+                });
+                
+                return res.status(400).json({ 
+                    message: "This auction has ended. The winner has been determined.", 
+                    winner: highestBid.user_id === user_id,
+                    winningBid: highestBid
+                });
+            } else {
+                await auction.save();
+                return res.status(400).json({ message: "This auction has ended with no bids." });
+            }
+        }
+        
         // Create a new bid
         const newBid = await Bid.create({
             auction_id,
@@ -80,8 +138,7 @@ export const placeBid = async (req: AuthRequest, res: any) => {
         });
         
         // Update auction's current price
-        const auction = await Auction.findOne({ where: { auction_id } });
-        if (auction && amount > auction.currentPrice) {
+        if (amount > auction.currentPrice) {
             auction.currentPrice = amount;
             await auction.save();
         }
@@ -168,6 +225,41 @@ export const getUserWonAuctions = async (req: AuthRequest, res: Response): Promi
     } catch (error) {
         console.error("Error getting won auctions:", error);
         res.status(500).json({ message: "Error getting won auctions", error });
+    }
+};
+
+// Get all bids for an auction (bid history)
+export const getBidHistory = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const auction_id = req.params.auction_id;
+
+        if (!auction_id) {
+            res.status(400).json({ message: "auction_id parameter is required" });
+            return;
+        }
+
+        // Import the User model
+        const { User } = require('../../models/user');
+
+        // Get all bids for this auction with user information
+        const bids = await Bid.findAll({
+            where: { auction_id },
+            include: [{
+                model: User,
+                attributes: ['username', 'user_id']
+            }],
+            order: [['bidTime', 'DESC']] // Sort by bid time descending (newest first)
+        });
+
+        if (!bids || bids.length === 0) {
+            res.status(404).json({ message: "No bids found for this auction" });
+            return;
+        }
+
+        res.status(200).json(bids);
+    } catch (error) {
+        console.error("Error retrieving bid history:", error);
+        res.status(500).json({ message: "Error retrieving bid history", error });
     }
 };
 

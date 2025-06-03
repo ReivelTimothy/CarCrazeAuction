@@ -1,5 +1,5 @@
 import express from 'express';
-import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId } from '../controller/transactionController';
+import { createTransaction, getAllTransactions, getTransactionById, getTransactionByUserId, updateTransactionStatus, deleteTransaction, getTransactionByVehicleId, checkUserIsWinnerAndGetTransaction } from '../controller/transactionController';
 import { authenticateJWT } from '../middleware/auth';
 const transactionRoutes = express.Router();
 
@@ -17,4 +17,6 @@ transactionRoutes.put('/:id/updateTransactionStatus', authenticateJWT, updateTra
 transactionRoutes.delete('/:id/deleteTransaction', authenticateJWT, deleteTransaction);
 // 7. Get Transaction by Vehicle ID
 transactionRoutes.get('/:vehicle_id/getTransactionByVehicleId', authenticateJWT, getTransactionByVehicleId);
+// 8. Check if user is winner and get transaction details
+transactionRoutes.get('/auction/:auction_id/check-winner', authenticateJWT, checkUserIsWinnerAndGetTransaction);
 export default transactionRoutes;

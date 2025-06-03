@@ -54,3 +54,27 @@ export const getUserWonAuctions = (): Promise<Auction[]> => {
 export const getAdminStatistics = (): Promise<AdminStatistics> => {
   return fetchFromAPI('/admin/statistics', 'GET');
 };
+
+// Function to check auction end status and determine winner
+export const checkAuctionEndAndDetermineWinner = (auctionId: string): Promise<{
+  message: string;
+  winner?: boolean;
+  winnerId?: string;
+  winningAmount?: number;
+  transactionId?: string;
+  transactionStatus?: string;
+  status?: string;
+  timeRemaining?: number;
+  endDate?: string;
+}> => {
+  return fetchFromAPI(`/auction/${auctionId}/check-end`, 'GET');
+};
+
+// Function to check if current user is the winner and get transaction details
+export const checkUserIsWinnerAndGetTransaction = (auctionId: string): Promise<{
+  isWinner: boolean;
+  transaction?: any;
+  message: string;
+}> => {
+  return fetchFromAPI(`/transaction/auction/${auctionId}/check-winner`, 'GET');
+};

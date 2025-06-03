@@ -1,5 +1,5 @@
 import express from "express";
-import { getHighestBid, updateBidPrice, placeBid, getUserParticipatedAuctions, getUserWonAuctions } from "../controller/bidController";
+import { getHighestBid, updateBidPrice, placeBid, getUserParticipatedAuctions, getUserWonAuctions, getBidHistory } from "../controller/bidController";
 import { authenticateJWT } from '../middleware/auth';
 const bidRoutes = express.Router();
 
@@ -13,5 +13,7 @@ bidRoutes.post("/:auction_id/placeBid", authenticateJWT, placeBid);
 bidRoutes.get("/user/participated", authenticateJWT, getUserParticipatedAuctions);
 // 5. Get User Won Auctions
 bidRoutes.get("/user/won", authenticateJWT, getUserWonAuctions);
+// 6. Get Bid History for an Auction
+bidRoutes.get("/:auction_id/history", getBidHistory);
 
 export default bidRoutes;

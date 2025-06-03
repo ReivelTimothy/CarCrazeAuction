@@ -241,14 +241,12 @@ async function seed() {
             category: "Truck",
             image: 'dutro2018.jpg',
             vehicle_id: vehicle5.vehicle_id,
-        });
-
-        const auction6 = await Auction.create({
+        });        const auction6 = await Auction.create({
             auction_id: uuidv4(),
             title: 'BMW X5 2020 - Luxury SUV',
             description: 'Premium luxury SUV with all features. Low mileage, excellent condition with warranty and service records.',
             startingPrice: 750_000_000,
-            currentPrice: 750_000_000,
+            currentPrice: 820_000_000, // Updated to match the highest bid
             startDate: new Date(Date.now() - 86400000), // Started yesterday
             endDate: new Date(Date.now() - 3600000), // Ended 1 hour ago
             status: "closed",

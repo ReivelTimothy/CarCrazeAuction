@@ -47,6 +47,10 @@ export interface Bid {
   auction_id: string;
   amount: number;
   bidTime: string | Date;
+  user?: {
+    username: string;
+    user_id: string;
+  };
 }
 
 export interface LoginCredentials {
@@ -72,6 +76,41 @@ export interface APIResponse<T> {
   error?: string;
 }
 
+// Transaction types
+export interface Transaction {
+  transaction_id: string;
+  user_id: string;
+  auction_id: string;
+  amount: number;
+  transactionDate: string | Date;
+  status: 'Pending' | 'Completed' | 'Cancelled' | 'Failed';
+  paymentMethod: string;
+  user?: {
+    username: string;
+    user_id: string;
+  };
+}
+
+// Winner check response type
+export interface WinnerCheckResponse {
+  isWinner: boolean;
+  transaction?: Transaction;
+  message: string;
+}
+
+// Auction end check response type
+export interface AuctionEndCheckResponse {
+  message: string;
+  winner?: boolean;
+  winnerId?: string;
+  winningAmount?: number;
+  transactionId?: string;
+  transactionStatus?: string;
+  status?: string;
+  timeRemaining?: number;
+  endDate?: string;
+}
+
 // Admin statistics type
 export interface AdminStatistics {
   totalAuctions: number;
@@ -85,13 +124,16 @@ export interface AdminStatistics {
     currentPrice: number;
     endDate: string;
     bidCount: number;
-  }>;
-  recentBids?: Array<{
+  }>;  recentBids?: Array<{
     bid_id: string;
     user_id: string;
     auction_id: string;
     auction_title: string;
     amount: number;
     bidTime: string | Date;
+    user?: {
+      username: string;
+      user_id: string;
+    };
   }>;
 }

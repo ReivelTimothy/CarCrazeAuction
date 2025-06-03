@@ -16,6 +16,20 @@ export const getHighestBid = async (auctionId: string): Promise<Bid | null> => {
   }
 };
 
+export const getBidHistory = async (auctionId: string): Promise<Bid[]> => {
+  try {
+    return await fetchFromAPI(`/bid/${auctionId}/history`, 'GET');
+  } catch (error) {
+    if (error instanceof Error && 
+        (error.message === 'No bids found for this auction' || 
+         error.message === 'No bids found')) {
+      console.log('No bid history found for auction', auctionId);
+      return [];
+    }
+    throw error;
+  }
+};
+
 export const updateBidPrice = (auctionId: string, amount: number): Promise<Bid> => {
   return fetchFromAPI(`/bid/${auctionId}/updateBidPrice`, 'PUT', { auction_id: auctionId, amount });
 };

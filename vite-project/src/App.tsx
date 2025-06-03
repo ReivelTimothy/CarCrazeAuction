@@ -10,6 +10,7 @@ import './styles/App.css';
 import AuctionDetails from './pages/auctionDetails';
 import Profile from './pages/profile';
 import CreateAuction from './pages/createAuction';
+import TransactionDetails from './pages/transactionDetails';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
@@ -33,10 +34,10 @@ const AppRoutes: React.FC = () => {
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <Navigate to="/login" />} />
           <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
           <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
-          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />
-          <Route path="/auction/:id" element={<ProtectedRoute element={<AuctionDetails />} />} />
+          <Route path="/home" element={<ProtectedRoute element={<Home />} />} />          <Route path="/auction/:id" element={<ProtectedRoute element={<AuctionDetails />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
           <Route path="/create-auction" element={<ProtectedRoute element={<CreateAuction />} />} />
+          <Route path="/transaction/:id" element={<ProtectedRoute element={<TransactionDetails />} />} />
         </Routes>
       </div>
     </>

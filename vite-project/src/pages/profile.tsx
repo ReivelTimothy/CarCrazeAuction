@@ -309,10 +309,9 @@ const Profile: React.FC = () => {
                     <div className="bid-activity-list">
                       {adminStats.recentBids.map(bid => (
                         <div key={bid.bid_id} className="bid-activity-item">
-                          <div className="bid-activity-details">
-                            <div className="bid-user">
+                          <div className="bid-activity-details">                            <div className="bid-user">
                               <span className="user-icon"></span>
-                              <span className="user-id">{bid.user_id}</span>
+                              <span className="user-id">{bid.user?.username || `User ${bid.user_id}`}</span>
                             </div>
                             <div className="bid-info">
                               <span className="bid-amount">${bid.amount.toLocaleString()}</span>

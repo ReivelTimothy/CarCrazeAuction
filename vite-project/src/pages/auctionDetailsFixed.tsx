@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAuctionById, updateAuctionStatus } from '../services/auctionService';
 import { getVehicleById } from '../services/vehicleService';
-import { getHighestBid, placeBid } from '../services/bidService';
+import { getHighestBid, placeBid, getBidHistory } from '../services/bidService';
 import { useAuth } from '../context/AuthContext';
 import type { Auction, Vehicle, Bid } from '../types/types';
 import '../styles/auctionDetails.css';
@@ -12,6 +12,7 @@ const AuctionDetails: React.FC = () => {
   const [auction, setAuction] = useState<Auction | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [highestBid, setHighestBid] = useState<Bid | null>(null);
+  const [bidHistory, setBidHistory] = useState<Bid[]>([]);
   const [bidAmount, setBidAmount] = useState<string>('');
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,6 +51,15 @@ const AuctionDetails: React.FC = () => {
           // It's normal to have no bids, so just log it with more context
           console.log('No bids found for this auction - handled gracefully');
           // highestBid remains null which is fine
+        }
+
+        // Fetch bid history
+        try {
+          const bidHistoryData = await getBidHistory(id);
+          setBidHistory(bidHistoryData);
+        } catch (bidHistErr) {
+          console.log('No bid history found for auction', id);
+          // bidHistory remains empty array which is fine
         }
       } catch (err: any) {
         console.error('Error fetching auction details:', err);
@@ -263,6 +273,12 @@ const AuctionDetails: React.FC = () => {
                 <span className="meta-label">Current Bid:</span>
                 <span className="meta-value price">$  {auction.currentPrice.toLocaleString()}</span>
               </div>
+              {highestBid && (
+                <div className="meta-item">
+                  <span className="meta-label">Highest Bidder:</span>
+                  <span className="meta-value">{highestBid.user?.username || `User ${highestBid.user_id}`}</span>
+                </div>
+              )}
               <div className="meta-item">
                 <span className="meta-label">Time Left:</span>
                 <span className="meta-value time-left">{timeLeft}</span>
@@ -333,6 +349,28 @@ const AuctionDetails: React.FC = () => {
               <h2>Description</h2>
               <div className="description-content">
                 <p>{auction.description}</p>
+              </div>
+            </div>
+            
+            {/* Bid History Section */}
+            <div className="tab-section">
+              <h2>Bid History</h2>
+              <div className="bid-history-content">
+                {bidHistory.length > 0 ? (
+                  <div className="bid-history-list">
+                    {bidHistory.map((bid) => (
+                      <div key={bid.bid_id} className="bid-history-item">
+                        <div className="bid-info">
+                          <span className="bid-amount">${bid.amount.toLocaleString()}</span>
+                          <span className="bid-user">{bid.user?.username || `User ${bid.user_id}`}</span>
+                          <span className="bid-time">{formatDate(bid.bidTime)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No bids have been placed yet.</p>
+                )}
               </div>
             </div>
             
